@@ -1,0 +1,2854 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model alergenicos {
+  id                 Int      @id @default(autoincrement())
+  nome               String   @db.Text
+  nomebr             String   @db.Text
+  referencia         String   @db.Text
+  data               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id         Int
+  concentracaomaxima Decimal  @default(100.0000) @db.Decimal(10, 4)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model ambientecentral {
+  id     Int
+  nome   String? @db.VarChar(200)
+  status Int?
+
+  @@ignore
+}
+
+model anuncio {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  autor      String   @db.Text
+  texto      String   @db.Text
+  data       DateTime @default(now()) @db.Timestamp(0)
+  status_id  Int
+  vencimento DateTime @db.DateTime(0)
+}
+
+model apimigrations {
+  id          Int       @id @default(autoincrement())
+  key         String    @db.VarChar(200)
+  nome        String?   @db.VarChar(200)
+  informacoes String?   @db.LongText
+  data        DateTime? @db.DateTime(0)
+  status      Int?
+  response    String    @db.VarChar(200)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model asaas_cobrancas {
+  id                    Int      @id @default(autoincrement())
+  asaas_payment_id      String   @unique(map: "asaas_payment_id") @db.VarChar(255)
+  subconta_config_id    Int
+  cliente_final_id      Int
+  referencia            String?  @db.VarChar(255)
+  valor                 Decimal  @db.Decimal(10, 2)
+  data_vencimento       DateTime @db.Date
+  tipo_pagamento        String   @db.VarChar(50)
+  descricao             String?  @db.Text
+  status                String   @default("PENDING") @db.VarChar(50)
+  transactionReceiptUrl String?  @db.Text
+  url_cobranca          String?  @db.Text
+  json_asaas            String?  @db.LongText
+  created_at            DateTime @default(now()) @db.Timestamp(0)
+  updated_at            DateTime @default(now()) @db.Timestamp(0)
+  pedido_id             Int?
+  financeiro_conta_id   Int?
+
+  @@index([cliente_final_id], map: "fk_cobranca_cliente")
+  @@index([subconta_config_id], map: "fk_cobranca_subconta")
+  @@index([financeiro_conta_id], map: "idx_financeiro_conta_id")
+  @@index([pedido_id], map: "idx_pedido_id")
+}
+
+model asaas_config {
+  id                    Int     @id @default(autoincrement())
+  asaas_id_account      String? @db.VarChar(255)
+  cnpj                  String? @db.VarChar(50)
+  api_key               String? @db.VarChar(255)
+  notifications_enabled Int?    @default(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model asaas_refunds {
+  id                    Int       @id @default(autoincrement())
+  asaas_refund_id       String    @unique(map: "asaas_refund_id") @db.VarChar(255)
+  cobranca_id           Int
+  valor_estornado       Decimal   @db.Decimal(10, 2)
+  data_solicitacao      DateTime  @db.DateTime(0)
+  data_efetivacao       DateTime? @db.DateTime(0)
+  status                String    @db.VarChar(50)
+  transactionReceiptUrl String?   @db.VarChar(50)
+  motivo                String?   @db.Text
+
+  @@index([cobranca_id], map: "fk_refund_cobranca")
+}
+
+model assinaturas {
+  id                 Int       @id @default(autoincrement())
+  clienteId          Int
+  pastadedados       String    @db.VarChar(255)
+  vencimento         DateTime? @db.DateTime(0)
+  status             Int?      @default(1) @db.SmallInt
+  assinatura_id      String    @db.VarChar(255)
+  plano_id           Int
+  tem_personalizados Boolean?  @default(false)
+  cupom_id           Int?
+}
+
+model assinaturas_personalizadas {
+  assinatura_id    BigInt
+  due_date         DateTime @default(now()) @db.Timestamp(0)
+  valor            Decimal  @db.Decimal(10, 2)
+  assinatura_asaas String   @db.VarChar(255)
+  max_payments     Int
+  id               BigInt   @id @default(autoincrement())
+}
+
+model bancosdedados {
+  id         Int    @id @default(autoincrement())
+  disponivel Int    @db.TinyInt
+  cliente_id Int?
+  dbname     String @db.VarChar(255)
+  host       String @db.VarChar(100)
+  usuariobd  String @db.VarChar(100)
+  senhabd    String @db.VarChar(100)
+}
+
+model calendario {
+  id           Int      @id @default(autoincrement())
+  nome         String   @db.Text
+  dia          DateTime @db.DateTime(0)
+  letivo       Int
+  observacao   String   @db.Text
+  status_id    Int
+  usuario_id   Int
+  data         DateTime @default(now()) @db.Timestamp(0)
+  numdiasemana Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model cfop {
+  id     Int
+  nome   String? @db.VarChar(200)
+  codigo Int?
+
+  @@ignore
+}
+
+model cliente {
+  id                  Int       @id @default(autoincrement())
+  nome                String    @db.Text
+  fantasia            String?   @db.Text
+  cnpj_cpf            String?   @db.Text
+  cpf                 String    @db.Text
+  telefone            String?   @db.Text
+  celular             String?   @db.Text
+  email               String?   @db.Text
+  cep                 String    @db.Text
+  numero              String    @db.Text
+  complemento         String?   @db.Text
+  rua                 String?   @db.Text
+  bairro              String?   @db.Text
+  cidade              String?   @db.Text
+  estado              String?   @db.Text
+  pais                String?   @db.Text
+  empresa_id          Int
+  produtomarca_id     Int
+  status_id           Int
+  data                DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id          Int
+  observacao          String?   @db.Text
+  chaveacesso         String?   @db.Text
+  senha               String?   @db.Text
+  crt                 Int?
+  consumidorfinal     Int?
+  naturezaoperacao_id Int?
+  ie                  String?   @db.Text
+  suframa             String?   @db.VarChar(15)
+  im                  String?   @db.Text
+  tipocliente         Int?
+  idestrangeiro       String?   @db.Text
+  ibge                String?   @db.Text
+  contribuinte        Int?
+  token               String?   @db.Text
+  datatoken           DateTime? @db.DateTime(0)
+  password            String?   @db.Text
+  isvalid             Int?      @default(1)
+  datavalidate        DateTime? @db.DateTime(0)
+}
+
+model clientedadoscomerciais {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  cliente_id                  Int
+  vendedor_id                 Int
+  clienterota_id              Int?     @default(0)
+  produtoversaotabelapreco_id Int
+  capital                     Decimal  @db.Decimal(60, 3)
+  valorminimo                 Decimal? @db.Decimal(60, 3)
+  valormaximo                 Decimal? @db.Decimal(60, 3)
+  status_id                   Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+}
+
+model clientefinanceiroformapagamento {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  financeiroformapagamento_id Int
+  cliente_id                  Int
+  status_id                   Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+}
+
+model clienterota {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  descricao  String   @db.Text
+  hora       DateTime @db.Time(0)
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model clientes {
+  id                 Int     @id @default(autoincrement())
+  nome               String  @db.Text
+  cnpj               String  @db.Text
+  responsavel        String? @db.Text
+  telefone           String? @db.Text
+  celular            String? @db.Text
+  email              String? @db.Text
+  cep                String? @db.Text
+  rua                String? @db.Text
+  bairro             String? @db.Text
+  cidade             String? @db.Text
+  estado             String? @db.Text
+  pais               String? @db.Text
+  numero             String? @db.Text
+  complemento        String? @db.Text
+  host               String? @db.Text
+  bancodedados       String? @db.Text
+  usuariobd          String? @db.Text
+  senhabd            String? @db.Text
+  pastadados         String? @db.Text
+  urlsite            String? @db.Text
+  modooperacao       String? @db.Text
+  corpadrao          String? @db.Text
+  usuario            String? @db.Text
+  senha              String? @db.Text
+  formulariogrupo_id Int
+  recursoslimitados  Int?
+  qtdeusuarios       String? @db.Text
+  qtderegistros      String? @db.Text
+  qtdefornecedores   Int?
+  qtdemarca          Int?
+  qtdeembalagem      Int?
+  qtdeformulacao     Int?
+  qtdemateriaprima   Int?
+  qtdegrupoproduto   Int?
+  qtdeprodutoacabado Int?
+  qtdegrupoversao    Int?
+  qtdecnpj           Int?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model clientes_finais_asaas {
+  id                 Int     @id @default(autoincrement())
+  subconta_config_id Int
+  asaas_customer_id  String  @unique(map: "asaas_customer_id") @db.VarChar(255)
+  cpf_cnpj           String  @db.VarChar(14)
+  nome               String? @db.VarChar(255)
+  email              String? @db.VarChar(255)
+  celular            String? @db.VarChar(255)
+  cep                String? @db.VarChar(255)
+  rua                String? @db.VarChar(255)
+  numero             String? @db.VarChar(255)
+  complemento        String? @db.VarChar(255)
+  bairro             String? @db.VarChar(255)
+
+  @@unique([subconta_config_id, cpf_cnpj], map: "uk_subconta_cpf")
+}
+
+model contratoaceite {
+  id           Int      @id @default(autoincrement())
+  contratos_id Int
+  clientes_id  Int
+  dataaceite   DateTime @default(now()) @db.Timestamp(0)
+}
+
+model contratos {
+  id             Int      @id @default(autoincrement())
+  nome           String   @db.Text
+  texto          String   @db.Text
+  datavencimento DateTime @db.DateTime(0)
+  data           DateTime @db.DateTime(0)
+  status_id      Int
+}
+
+model cosmetovigilancia {
+  id         Int       @id @default(autoincrement())
+  nome       String    @db.Text
+  cnpj_cpf   String?   @db.Text
+  telefone   String    @db.Text
+  email      String    @db.Text
+  endereco   String?   @db.Text
+  produto_id Int
+  demanda    String?   @db.Text
+  conclusao  String?   @db.Text
+  sexo       String?   @db.VarChar(255)
+  idade      Int?
+  usuario_id Int?
+  data       DateTime? @db.DateTime(0)
+  produto    String?   @db.Text
+}
+
+model cosmetovigilanciaanexo {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.VarChar(255)
+  arquivo              String   @db.VarChar(255)
+  usuario_id           Int
+  cosmetovigilancia_id Int
+  data                 DateTime @default(now()) @db.DateTime(0)
+  anotacoes            String?  @db.Text
+}
+
+model cotacao {
+  id                   Int       @id @default(autoincrement())
+  nome                 String    @db.Text
+  pedidocotacao_id     Int
+  fornecedor_id        Int
+  fornecedorcontato_id Int
+  data                 DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id           Int
+  cotacaosituacao_id   Int
+  status_id            Int
+  dataentrega          DateTime? @db.Date
+  valorfrete           Decimal   @db.Decimal(60, 4)
+  observacao           String?   @db.Text
+  datapreenchimento    DateTime? @db.DateTime(0)
+  chaveacesso          String?   @db.Text
+  datalimite           DateTime? @db.DateTime(0)
+}
+
+model cotacaoitens {
+  id         Int     @id @default(autoincrement())
+  cotacao_id Int
+  insumo_id  Int
+  unidade_id Int
+  quantidade String  @db.Text
+  moeda_id   Int     @default(1)
+  cambio     Decimal @default(0.000) @db.Decimal(60, 3)
+  valor      Decimal @db.Decimal(60, 4)
+  valortotal Decimal @db.Decimal(10, 4)
+  valorfinal Decimal @default(0.000) @db.Decimal(60, 3)
+  freteitem  Decimal @default(0.000) @db.Decimal(60, 3)
+  aprovado   Int     @default(0)
+}
+
+model cotacaosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model cupons {
+  id               BigInt  @id @default(autoincrement())
+  nome             String  @db.VarChar(255)
+  codigo           String  @db.VarChar(255)
+  tipo_desconto    String  @db.VarChar(255)
+  valor_fixo       Decimal @db.Decimal(10, 2)
+  valor_percentual Decimal @db.Decimal(10, 2)
+  data_inicio      Int
+  perpetuo         Boolean
+  qnt_parcelas     Int
+  plano_id         BigInt
+}
+
+model documentoarea {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model documentoresponsavel {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  status_id        Int
+  data             DateTime @default(now()) @db.Timestamp(0)
+  documentoarea_id Int
+  usuario_id       Int
+  id_usuario       Int      @default(0)
+}
+
+model documentos {
+  id                      Int      @id @default(autoincrement())
+  nome                    String   @db.Text
+  codigo                  String   @db.Text
+  documentotipo_id        Int
+  documentoarea_id        Int
+  documentoresponsavel_id Int
+  status_id               Int
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  usuario_id              Int
+  diasalertavencimento    Int      @default(30)
+  status_alerta           Int?
+}
+
+model documentotipo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model documentoversao {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  documentos_id Int
+  versao        Int
+  validade      DateTime @db.DateTime(0)
+  datavalidacao DateTime @db.Date
+  observacao    String   @db.Text
+  status_id     Int
+  texto         String?  @db.LongText
+  arquivo       String?  @db.Text
+  data          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id    Int
+}
+
+model documentoversaoanexo {
+  id                 Int      @id @default(autoincrement())
+  nome               String   @db.VarChar(255)
+  arquivo            String   @db.VarChar(255)
+  documentoversao_id Int
+  usuario_id         Int
+  data               DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([documentoversao_id], map: "idx_documentoversao")
+  @@index([usuario_id], map: "idx_usuario")
+}
+
+model dossieanvisa {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model embalagem {
+  id                 Int       @id @default(autoincrement())
+  nome               String    @db.Text
+  codigo             String?   @db.Text
+  ultimocodigo       String?   @db.Text
+  codigoerp          String?   @db.Text
+  unidade_id         Int
+  origem             String    @db.Text
+  embalagemtipo_id   Int
+  embalagemmodelo_id Int
+  customedio         Decimal?  @default(0.0000000000) @db.Decimal(65, 10)
+  custoreal          Decimal   @default(0.0000000000) @db.Decimal(65, 10)
+  moeda_id           Int
+  fornecedor_id      Int
+  observacao         String?   @db.Text
+  anotacao           String?   @db.Text
+  embalagemstatus_id Int
+  data               DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id         Int?
+  custodereferencia  Decimal?  @default(0.0000000000) @db.Decimal(65, 10)
+  endereco           String?   @db.Text
+  ncm                String    @default("00000000") @db.VarChar(10)
+}
+
+model embalagemanexo {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  requisitotecnico String   @db.Text
+  grupo            String   @db.Text
+  anotacoes        String?  @db.Text
+  arquivo          String?  @db.Text
+  embalagem_id     Int
+  usuario_id       Int?
+  data             DateTime @default(now()) @db.Timestamp(0)
+}
+
+model embalagemespecificacoes {
+  id                   Int      @id @default(autoincrement())
+  nome                 String?  @db.Text
+  embalagem_id         Int
+  usuario_id           Int
+  especificacaostatus  String?  @db.Text
+  oficializada         String?  @db.Text
+  arquivada            String?  @db.Text
+  parametrosanalise_id Int
+  metodologia          String?  @db.Text
+  especificacoes       String?  @db.Text
+  data                 DateTime @default(now()) @db.Timestamp(0)
+}
+
+model embalagemfornecedores {
+  id            Int      @id @default(autoincrement())
+  embalagem_id  Int
+  fornecedor_id Int
+  data          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id    Int
+  anotacoes     String?  @db.Text
+}
+
+model embalagemmodelo {
+  id               Int    @id @default(autoincrement())
+  nome             String @db.Text
+  embalagemtipo_id Int    @default(1)
+}
+
+model embalagemstatus {
+  id   Int     @id @default(autoincrement())
+  nome String? @db.Text
+}
+
+model embalagemtipo {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model embalagemtransformacao {
+  id                       Int       @id @default(autoincrement())
+  estoqueinsumo_id         Int
+  qtde_original            Float     @db.Float
+  medida_original          Float     @db.Float
+  qtde_m_quadr_original    Float     @db.Float
+  embalagem_id             Int
+  unidade_destino          String    @db.VarChar(10)
+  qtde_destino             Float     @db.Float
+  medida_destino           Float     @db.Float
+  qtd_m_quadr_destino      Float     @db.Float
+  datadisponibilizacao     DateTime? @db.DateTime(0)
+  usuario_id               Int
+  loteinterno_id           Int
+  rendimento               Int?
+  qtd_m2_result            Int?
+  data_transformacao       DateTime? @db.DateTime(0)
+  usuario_id_transformacao Int?
+  unidade_original         String?   @db.VarChar(30)
+  lotfabdest               String?   @db.VarChar(50)
+  validadeoriginal         DateTime? @db.Date
+  valor_final              Float?    @db.Float
+  perda                    Int?
+  envase                   Int       @default(0)
+  quantidaproduzida        Int?
+}
+
+model empresa {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model estoque {
+  id                     Int      @id @default(autoincrement())
+  nome                   String   @db.Text
+  produtoversao_id       Int
+  quantidade             Decimal  @db.Decimal(60, 3)
+  lote                   String   @db.Text
+  origem                 String   @db.Text
+  ordemproducao_id       Int
+  statusestoqueinsumo_id Int
+  data                   DateTime @default(now()) @db.Timestamp(0)
+  usuario_id             Int
+}
+
+model estoqueinsumo {
+  id                     Int      @id @default(autoincrement())
+  insumoid               String   @db.Text
+  codigo                 String   @db.Text
+  nome                   String   @db.Text
+  quantidade             Decimal  @db.Decimal(10, 4)
+  lote                   String   @db.Text
+  loteinterno            String   @db.Text
+  fabricacao             DateTime @db.Date
+  vencimento             DateTime @db.Date
+  pedidocompra_id        Int
+  statusestoqueinsumo_id Int
+  empresa_id             Int
+  data                   DateTime @default(now()) @db.Timestamp(0)
+  usuario_id             Int
+  unidade_id             Int      @default(1)
+  pedidocompraitens_id   Int      @default(0)
+  tipo                   Int      @default(1)
+
+  @@index([insumoid(length: 768)], map: "index")
+}
+
+model estoqueinsumohistorico {
+  id               Int      @id @default(autoincrement())
+  estoqueinsumo_id Int
+  nome             String   @db.VarChar(255)
+  quantidade       Decimal  @db.Decimal(10, 4)
+  data             DateTime @db.DateTime(0)
+  lote             String   @db.VarChar(255)
+  loteinterno      String   @db.VarChar(255)
+  ordemproducao_id Int
+  usuario_id       Int
+}
+
+model estoqueinsumomovimento {
+  id                         Int      @id @default(autoincrement())
+  nome                       String   @db.Text
+  estoquetipomovimentacao_id Int
+  estoqueinsumo_id           Int
+  quantidade                 Decimal  @db.Decimal(10, 4)
+  data                       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                 Int
+  ordemproducao_id           Int      @default(0)
+  saldo_anterior             Decimal? @db.Decimal(10, 4)
+}
+
+model estoquerecebimento {
+  id                     Int      @id @default(autoincrement())
+  pedidocompraitens_id   Int
+  pedidocompra_id        Int      @default(0)
+  nome                   String   @db.Text
+  idproduto              Int
+  codigo                 String   @db.Text
+  quantidade             Decimal  @db.Decimal(10, 4)
+  lote                   String   @db.Text
+  loteinterno            String   @db.Text
+  fabricacao             DateTime @db.Date
+  vencimento             DateTime @db.Date
+  statusestoqueinsumo_id Int
+  unidade_id             Int      @default(1)
+  volumes                Int      @default(1)
+}
+
+model estoquetipomovimentacao {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model financeirobanco {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  agencia    String   @db.Text
+  conta      String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  saldo      Decimal  @default(0.000) @db.Decimal(60, 3)
+}
+
+model financeirocentrodecusto {
+  id                         Int      @id @default(autoincrement())
+  nome                       String   @db.Text
+  codigo                     String   @db.Text
+  financeirocentrodecusto_id Int
+  status_id                  Int
+  data                       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                 Int
+  pai                        Int      @default(0)
+}
+
+model financeiroconta {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  financeirocentrodecusto_id  Int
+  financeiroformapagamento_id Int
+  financeirocontatipo_id      Int
+  financeirobanco_id          Int
+  financeirosituacao_id       Int
+  valordaconta                Decimal  @db.Decimal(60, 2)
+  valordotitulo               Decimal  @db.Decimal(60, 2)
+  desconto                    Decimal  @db.Decimal(60, 2)
+  totaldeparcelas             Int
+  parcela                     Int
+  datavencimento              DateTime @db.Date
+  valoratualizado             Decimal  @db.Decimal(60, 2)
+  valorpago                   Decimal  @db.Decimal(60, 2)
+  datapagamento               DateTime @db.DateTime(0)
+  cliente_id                  Int
+  fornecedor_id               Int
+  multa                       Decimal  @db.Decimal(60, 2)
+  jurosmora                   Decimal  @db.Decimal(60, 2)
+  jurosmensal                 Decimal  @db.Decimal(60, 2)
+  jurosdiario                 Decimal  @db.Decimal(60, 2)
+  jurosoutros                 Decimal  @db.Decimal(60, 2)
+  status_id                   Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+  usuariopagador              Int
+  diasentreparcelas           Int      @default(0)
+  observacao                  String?  @db.Text
+  pedido_id                   Int?
+  fiscalnferecebimento_id     Int?
+  financeirodocumento_id      Int      @default(0)
+}
+
+model financeirocontamovimento {
+  id                     Int      @id @default(autoincrement())
+  nome                   String   @db.Text
+  financeiroconta_id     Int
+  financeirocontatipo_id Int
+  financeirobanco_id     Int
+  saldoanterior          Decimal  @default(0.000) @db.Decimal(60, 3)
+  valorpago              Decimal  @db.Decimal(60, 3)
+  valorrecebido          Decimal  @db.Decimal(60, 3)
+  datapagamento          DateTime @db.DateTime(0)
+  saldo                  Decimal  @default(0.000) @db.Decimal(60, 3)
+  status_id              Int?
+  data                   DateTime @default(now()) @db.Timestamp(0)
+  usuario_id             Int
+}
+
+model financeirocontasaldodiario {
+  id                 Int      @id @default(autoincrement())
+  nome               String   @db.Text
+  saldo              Decimal  @db.Decimal(60, 3)
+  datadosaldo        DateTime @db.DateTime(0)
+  status_id          Int
+  data               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id         Int
+  financeirobanco_id Int
+}
+
+model financeirocontatipo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model financeirodocumento {
+  id         Int     @id @default(autoincrement())
+  nome       String? @db.Text
+  observacao String? @db.Text
+}
+
+model financeiroformapagamento {
+  id                    Int      @id @default(autoincrement())
+  nome                  String   @db.Text
+  parcelas              Int
+  diasentreparcelas     Int
+  juros                 Decimal  @db.Decimal(60, 2)
+  status_id             Int
+  data                  DateTime @default(now()) @db.Timestamp(0)
+  usuario_id            Int
+  indicadorpagamento    Int      @default(0)
+  meiopagamento         Int      @default(1)
+  diasprimeiropagamento Int      @default(0)
+}
+
+model financeiroimportaofx {
+  id                   Int       @id @default(autoincrement())
+  instituicao_nome     String?   @db.VarChar(100)
+  agencia_numero       String?   @db.VarChar(20)
+  conta_numero         String?   @db.VarChar(30)
+  transacao_id_externo String?   @db.VarChar(100)
+  tipo_transacao       String?   @db.VarChar(50)
+  data_transacao       DateTime? @db.Date
+  valor_transacao      Decimal?  @db.Decimal(12, 2)
+  saldo_final          Decimal?  @db.Decimal(12, 2)
+  descricao            String?   @db.Text
+  data_insercao        DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model financeirosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model fiscalcartacorrecao {
+  id           Int      @id @default(autoincrement())
+  nome         String   @db.Text
+  numero       Int      @default(0)
+  fiscalnfe_id Int
+  texto        String   @db.Text
+  arquivo      String   @db.Text
+  data         DateTime @default(now()) @db.Timestamp(0)
+  usuario_id   Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalclasstriib {
+  id        Int                    @id @default(autoincrement())
+  codigo    String                 @unique(map: "codigo") @db.VarChar(20)
+  descricao String                 @db.Text
+  tipo      fiscalclasstriib_tipo? @default(IBS)
+  status_id Int?                   @default(1)
+  data      DateTime?              @default(now()) @db.DateTime(0)
+
+  @@index([codigo], map: "idx_codigo")
+  @@index([tipo], map: "idx_tipo")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalcreditopresumido {
+  id                Int                          @id @default(autoincrement())
+  codigo            String                       @unique(map: "codigo") @db.VarChar(10)
+  descricao         String                       @db.Text
+  tipo              fiscalcreditopresumido_tipo? @default(AMBOS)
+  percentual_padrao Decimal?                     @default(0.0000) @db.Decimal(5, 4)
+  status_id         Int?                         @default(1)
+  data              DateTime?                    @default(now()) @db.DateTime(0)
+
+  @@index([codigo], map: "idx_codigo")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalcstibscbs {
+  id        Int                        @id @default(autoincrement())
+  codigo    String                     @unique(map: "codigo") @db.VarChar(2)
+  descricao String                     @db.Text
+  aplicacao fiscalcstibscbs_aplicacao? @default(AMBOS)
+  status_id Int?                       @default(1)
+  data      DateTime?                  @default(now()) @db.DateTime(0)
+
+  @@index([codigo], map: "idx_codigo")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalibscbs {
+  id           Int       @id @default(autoincrement())
+  fiscalncm_id Int
+  cClassTrib   String    @db.VarChar(20)
+  pIBSUF       Decimal   @default(17.5000) @db.Decimal(7, 4)
+  pIBSMun      Decimal   @default(7.5000) @db.Decimal(7, 4)
+  pCBS         Decimal   @default(8.5000) @db.Decimal(7, 4)
+  pIS          Decimal   @default(0.0000) @db.Decimal(7, 4)
+  cstIBSCBS    String?   @default("00") @db.VarChar(3)
+  cstIS        String?   @default("00") @db.VarChar(3)
+  status_id    Int?      @default(1)
+  data         DateTime? @default(now()) @db.DateTime(0)
+  usuario_id   Int?
+
+  @@index([cClassTrib], map: "idx_cclass")
+  @@index([fiscalncm_id], map: "idx_ncm")
+  @@index([status_id], map: "idx_status")
+}
+
+model fiscalibscbs_log {
+  id              Int       @id @default(autoincrement())
+  fiscalibscbs_id Int
+  campo_alterado  String    @db.VarChar(50)
+  valor_anterior  String?   @db.VarChar(100)
+  valor_novo      String?   @db.VarChar(100)
+  usuario_id      Int?
+  data_alteracao  DateTime? @default(now()) @db.DateTime(0)
+
+  @@index([data_alteracao], map: "idx_data")
+  @@index([fiscalibscbs_id], map: "idx_fiscalibscbs")
+}
+
+model fiscalicms {
+  id       Int    @id @default(autoincrement())
+  nome     String @db.Text
+  c_digo   String @map("código") @db.Text
+  campo    String @db.Text
+  editavel Int
+  cst00    Int
+  cst10    Int
+  cst20    Int
+  cst30    Int
+  cst40    Int
+  cst41    Int
+  cst50    Int
+  cst51    Int
+  cst60    Int
+  cst70    Int
+  cst90    Int
+  cst101   Int
+  cst102   Int
+  cst103   Int
+  cst201   Int
+  cst202   Int
+  cst203   Int
+  cst300   Int
+  cst400   Int
+  cst500   Int
+  cst900   Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalimpostoextra {
+  id                            Int       @id @default(autoincrement())
+  nome                          String?   @db.Text
+  estado                        String?   @db.Text
+  naturezaoperacao_id           Int?
+  consumidorfinal               Int?
+  modbc                         Int?
+  modbcst                       Int?
+  motdesicms                    Int?
+  pbcop                         Decimal?  @db.Decimal(10, 2)
+  pcredsn                       Decimal?  @db.Decimal(10, 2)
+  picms                         Decimal?  @db.Decimal(10, 2)
+  picmsst                       Decimal?  @db.Decimal(10, 2)
+  pmvast                        Decimal?  @db.Decimal(10, 2)
+  predbc                        Decimal?  @db.Decimal(10, 2)
+  predbcst                      Decimal?  @db.Decimal(10, 2)
+  cstipi                        Int?
+  pipi                          Decimal?  @db.Decimal(10, 2)
+  cstpis                        String?   @db.VarChar(45)
+  ppis                          Decimal?  @db.Decimal(10, 2)
+  ppisst                        Decimal?  @db.Decimal(10, 2)
+  cstcofins                     Int?
+  pcofins                       Decimal?  @db.Decimal(10, 2)
+  status_id                     Int?
+  data                          DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id                    Int?
+  fiscalncm_id                  Int?
+  csticms                       Int?
+  ucom                          String?   @db.VarChar(255)
+  utrib                         String?   @db.VarChar(255)
+  qtrib                         Decimal?  @db.Decimal(10, 2)
+  pfcp                          Decimal?  @default(0.00000) @db.Decimal(18, 5)
+  pibsuf                        Decimal?  @default(0.0000) @db.Decimal(10, 4)
+  pibsmun                       Decimal?  @default(0.0000) @db.Decimal(10, 4)
+  pcbs                          Decimal?  @default(0.0000) @db.Decimal(10, 4)
+  pis                           Decimal?  @default(0.0000) @db.Decimal(10, 4)
+  cclasstribibs                 String?   @default("010101") @db.VarChar(10)
+  cstibs                        String?   @default("000") @db.VarChar(3)
+  vigencia_reforma              DateTime? @default(dbgenerated("('2026-01-05')")) @db.Date
+  fiscalprodverenquadramento_id Int
+
+  @@index([fiscalncm_id], map: "idx_fiscalncm")
+  @@index([vigencia_reforma], map: "idx_vigencia")
+}
+
+model fiscalncm {
+  id             Int      @id @default(autoincrement())
+  nome           String   @db.Text
+  descricao      String   @db.Text
+  status_id      Int
+  data           DateTime @default(now()) @db.Timestamp(0)
+  usuario_id     Int
+  observacao     String?  @db.Text
+  codigoauxiliar String?  @db.Text
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalnfe {
+  id                          Int       @id @default(autoincrement())
+  nome                        String    @db.Text
+  nnf                         String    @db.Text
+  cnf                         String?   @db.Text
+  serie                       String    @db.Text
+  dataemissao                 DateTime  @db.DateTime(0)
+  cnpjemitente                String    @db.Char(14)
+  emitente                    String    @db.Text
+  valor                       Decimal   @db.Decimal(60, 8)
+  cliente_id                  Int
+  xml                         String    @db.Text
+  situacaonfe                 Int
+  status_id                   Int
+  data                        DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+  pedido_id                   Int
+  naturezaoperacao_id         Int?      @default(1)
+  tpnf                        Int?      @default(1)
+  indpres                     Int?      @default(0)
+  financeiroformapagamento_id Int?
+  datapagamento               DateTime? @db.Date
+  informacaofisco             String?   @db.Text
+  informacaonfe               String?   @db.Text
+  frete                       Decimal?  @db.Decimal(60, 8)
+  modfrete                    Int?
+  transportador_id            Int?
+  volquantidade               Int?
+  volespecie                  String?   @db.Text
+  volnumero                   String?   @db.Text
+  refnfe                      String?   @db.Text
+  marca                       String?   @db.Text
+  pesoliquido                 Decimal?  @db.Decimal(10, 2)
+  pesobruto                   Decimal?  @db.Decimal(10, 2)
+  tpemis                      Int?
+  xjust                       String?   @db.Text
+  desconto                    Decimal?  @default(0.00000000) @db.Decimal(60, 8)
+  vprod                       Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vbc                         Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vicms                       Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vicmsdeson                  Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vbcst                       Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vst                         Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vfcpst                      Decimal?  @default(0.00000) @db.Decimal(18, 5)
+  vfcp                        Decimal?  @default(0.00000) @db.Decimal(18, 5)
+  vseg                        Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vdesc                       Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vii                         Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vipi                        Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vpis                        Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vcofins                     Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  voutro                      Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vnf                         Decimal?  @default(0.00000000) @db.Decimal(10, 8)
+  vibs                        Decimal?  @default(0.00) @db.Decimal(15, 2)
+  vcbs                        Decimal?  @default(0.00) @db.Decimal(15, 2)
+  vis                         Decimal?  @default(0.00) @db.Decimal(15, 2)
+  perfil_id                   Int?      @default(1)
+
+  @@index([dataemissao], map: "idx_dataemissao")
+  @@index([cnpjemitente], map: "idx_fiscalnfe_cnpjemitente")
+  @@index([dataemissao], map: "idx_fiscalnfe_dataemissao")
+  @@index([perfil_id], map: "idx_fiscalnfe_perfil_id")
+  @@index([vcbs], map: "idx_fiscalnfe_vcbs")
+  @@index([vibs], map: "idx_fiscalnfe_vibs")
+  @@index([vis], map: "idx_fiscalnfe_vis")
+  @@index([vcbs], map: "idx_vcbs")
+  @@index([vibs], map: "idx_vibs")
+  @@index([vis], map: "idx_vis")
+}
+
+model fiscalnfedevolucao {
+  id         Int       @id @default(autoincrement())
+  cfop       Int?
+  vipi       Int?
+  vicms      Int?
+  data       DateTime? @db.DateTime(0)
+  motivo     String?   @db.Text
+  chave      String?   @db.VarChar(200)
+  chave_nova String    @db.VarChar(200)
+  nNF        String?   @db.VarChar(200)
+  nfe_xml    String?   @db.LongText
+  cliente_id Int?
+
+  @@index([chave_nova], map: "idx_fiscalnfedevolucao_chave_nova")
+}
+
+model fiscalnfeevento {
+  id           Int      @id @default(autoincrement())
+  nome         String   @db.Text
+  resposta     String?  @db.Text
+  data         DateTime @default(now()) @db.Timestamp(0)
+  status_id    Int
+  usuario_id   Int      @default(1)
+  fiscalnfe_id Int
+}
+
+model fiscalnfeitens {
+  id               Int       @id @default(autoincrement())
+  produtoversao_id Int
+  quantidade       Decimal   @db.Decimal(60, 8)
+  valor            Decimal   @db.Decimal(60, 8)
+  valortotal       Decimal   @db.Decimal(60, 8)
+  desconto         Decimal   @db.Decimal(60, 8)
+  frete            Decimal   @db.Decimal(60, 8)
+  lote             String?   @db.Text
+  vencimento       DateTime? @db.DateTime(0)
+  fabricacao       DateTime? @db.DateTime(0)
+  status_id        Int
+  data             DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id       Int
+  fiscalnfe_id     Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model fiscalnferecebimento {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  nsu        String   @db.Text
+  nfe        String   @db.Text
+  cnpj       String   @db.Char(14)
+  chave      String   @db.Text
+  valor      Decimal  @db.Decimal(60, 8)
+  datanfe    DateTime @db.DateTime(0)
+  situacao   Int
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  perfil_id  Int?     @default(1)
+
+  @@index([cnpj], map: "idx_fiscalnferecebimento_cnpj")
+  @@index([perfil_id], map: "idx_fiscalnferecebimento_perfil_id")
+}
+
+model fiscalprodutoversao {
+  id                            Int      @id @default(autoincrement())
+  nome                          String?  @db.Text
+  produtoversao_id              Int
+  percicms                      Decimal  @db.Decimal(60, 3)
+  percpis                       Decimal  @db.Decimal(60, 3)
+  perccofins                    Decimal  @db.Decimal(60, 3)
+  percipi                       Decimal  @db.Decimal(60, 3)
+  cstcsosn                      Int
+  naturezaoperacao_id           Int
+  cstpis                        Int
+  cstcofins                     Int
+  cstipi                        Int
+  fiscalncm_id                  Int
+  cest                          Int
+  ean                           String   @db.Text
+  pesol                         Decimal  @db.Decimal(60, 3)
+  pesob                         Decimal  @db.Decimal(60, 3)
+  status_id                     Int
+  data                          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                    Int
+  orig                          Int?
+  ucom                          String?  @db.Text
+  utrib                         String?  @db.Text
+  qtrib                         Decimal? @db.Decimal(10, 2)
+  codigoanvisa                  String?  @db.Text
+  issqn                         Decimal? @db.Decimal(10, 2)
+  tipoproduto                   String?  @default("normal") @db.Text
+  observacao                    String?  @db.Text
+  fiscalprodverenquadramento_id Int
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model fiscalprodverenquadramento {
+  id                    Int
+  codigo                Int?
+  nome                  String?   @db.VarChar(200)
+  base_legal            String?   @db.VarChar(200)
+  observacao            String?   @db.Text
+  data                  DateTime? @db.DateTime(0)
+  fiscalprodvergrupo_id Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model fiscalprodvergrupo {
+  id   Int
+  nome String? @db.VarChar(45)
+
+  @@ignore
+}
+
+model formulacao {
+  id                  Int      @id @default(autoincrement())
+  nome                String   @db.Text
+  codigo              String   @db.Text
+  anotacao            String?  @db.Text
+  atualizacao         String?  @db.Text
+  tempovalidade       Int
+  tipotempovalidade   String   @db.Text
+  formulacaostatus_id Int
+  usuario_id          Int
+  grau                Int
+  aplicacaoenchague   String   @db.Text
+  cosmetico           String   @db.Text
+  processo            String   @db.Text
+  versao              Int      @default(1)
+  tamanhodolote       Decimal? @db.Decimal(18, 8)
+}
+
+model formulacaoanexo {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  requisitotecnico String   @db.Text
+  grupo            String   @db.Text
+  anotacoes        String?  @db.Text
+  arquivo          String   @db.Text
+  formulacao_id    Int
+  usuario_id       Int
+  data             DateTime @default(now()) @db.Timestamp(0)
+}
+
+model formulacaocontrolearquivo {
+  id            Int       @id @default(autoincrement())
+  nome          String?   @db.VarChar(200)
+  arquivo_nome  String    @db.VarChar(200)
+  arquivo       String?   @db.Text
+  data          DateTime? @db.DateTime(0)
+  produto_id    Int?
+  formulacao_id Int?
+  usuario_id    Int?
+}
+
+model formulacaoexpecificacao {
+  id                   Int       @id @default(autoincrement())
+  nome                 String    @db.Text
+  formulacao_id        Int
+  usuario_id           Int
+  especificacaostatus  String    @db.Text
+  oficializada         String    @db.Text
+  arquivada            String    @db.Text
+  parametrosanalise_id String    @db.Text
+  metodologia          String    @db.Text
+  especificacoes       String    @db.Text
+  data                 DateTime? @default(now()) @db.Timestamp(0)
+  microbiologico       String?   @default("N") @db.VarChar(1)
+}
+
+model formulacaoiaconteudos {
+  id       BigInt  @id @default(autoincrement())
+  tipo     String? @db.VarChar(100)
+  nome     String? @db.VarChar(255)
+  conteudo String? @db.Text
+}
+
+model formulacaomateriaprima {
+  id                   Int      @id @default(autoincrement())
+  formulacao_id        Int
+  materiaprima_id      Int
+  materiaprimanome     String   @db.Text
+  materiaprimacodigo   String   @db.Text
+  percentual           Decimal? @db.Decimal(18, 8)
+  fase                 String   @db.Text
+  funcaoigredientes_id Int?     @default(0)
+  funcaoigredientes    String?  @db.Text
+  trezentos            Decimal? @db.Decimal(18, 8)
+  massareal            String?  @db.Text
+}
+
+model formulacaostatus {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model formulacaotesteestabilidadesimplificado {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  data          DateTime @default(now()) @db.Timestamp(0)
+  especificacao String   @db.Text
+  resultado     String   @db.Text
+  usuario_id    Int
+  formulacao_id Int
+}
+
+model formulario {
+  id        Int    @id @default(autoincrement())
+  nome      String @db.Text
+  caminho   String @db.Text
+  status_id Int
+  icone_id  Int?
+  menu_id   Int
+}
+
+model formulariogrupo {
+  id          Int     @id @default(autoincrement())
+  nome        String  @db.Text
+  status_id   Int
+  descricao   String  @db.Text
+  formularios String? @db.Text
+}
+
+model formulariosugestao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  telefone   String   @db.Text
+  email      String?  @db.Text
+  mensagem   String   @db.Text
+}
+
+model formulasia {
+  id         BigInt    @id @default(autoincrement())
+  formula    String    @db.Text
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model fornecedor {
+  id           Int     @id @default(autoincrement())
+  nome         String  @db.Text
+  nomefantasia String  @db.Text
+  codigo       String  @db.Text
+  rua          String? @db.Text
+  bairro       String? @db.Text
+  cidade       String? @db.Text
+  estado       String? @db.Text
+  cep          String? @db.Text
+  pais         String? @db.Text
+  telefone     String? @db.Text
+  fax          String? @db.Text
+  site         String? @db.Text
+  observacao   String? @db.Text
+  cnpj_cpf     String? @db.Text
+  ie           String? @db.Text
+  email        String? @db.Text
+  status_id    Int?    @default(1)
+}
+
+model fornecedorcontato {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  telefone      String   @db.Text
+  celular       String   @db.Text
+  whatsapp      String   @db.Text
+  email         String   @db.Text
+  status_id     Int
+  data          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id    Int
+  fornecedor_id Int
+}
+
+model fornecedordocumento {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  fornecedor_id Int
+  data          DateTime @default(now()) @db.Timestamp(0)
+  datadocumento DateTime @db.DateTime(0)
+  datavalidade  DateTime @db.DateTime(0)
+  imagem        String?  @db.Text
+  usuario_id    Int
+}
+
+model fornecedormaterial {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model fornecedormaterialrelacao {
+  id                    Int @id @default(autoincrement())
+  fornecedor_id         Int
+  fornecedormaterial_id Int
+  status_id             Int
+}
+
+model funcaoigredientes {
+  id         Int       @id @default(autoincrement())
+  nome       String    @db.Text
+  nomeptbr   String    @db.Text
+  definicao  String    @db.Text
+  data       DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id Int?
+}
+
+model furmulacaocontroledeeficaciasimplificado {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  formulacao_id Int
+  data          DateTime @db.DateTime(0)
+  usuario_id    Int
+}
+
+model ibtp {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  usuario_id Int
+  estado     String   @db.Text
+  data       DateTime @default(now()) @db.Timestamp(0)
+  arquivo    String   @db.Text
+}
+
+model ibtpitens {
+  id                Int      @id @default(autoincrement())
+  ibtp_id           Int?
+  codigo            String?  @db.Text
+  descricao         String?  @db.Text
+  nacional_federal  Decimal? @db.Decimal(10, 2)
+  importado_federal Decimal? @db.Decimal(10, 2)
+  estadual          Decimal? @db.Decimal(10, 2)
+  municipal         Decimal? @db.Decimal(10, 2)
+}
+
+model icone {
+  id      Int    @id @default(autoincrement())
+  nome    String @db.Text
+  icone   String @db.Text
+  titulo  String @db.Text
+  unicode String @db.Text
+}
+
+model inci {
+  id                   Int       @id @default(autoincrement())
+  nome                 String    @db.Text
+  nomeptbr             String?   @db.Text
+  funcaoigredientes_id Int?
+  referencia           String?   @db.Text
+  lembretes            String?   @db.Text
+  anotacoes            String?   @db.Text
+  data                 DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id           Int?
+}
+
+model insumo {
+  id             Int      @id @default(autoincrement())
+  nome           String   @db.Text
+  insumogrupo_id Int      @default(1)
+  fornecedor_id  Int      @default(1)
+  valor_custo    Decimal  @default(0.0000) @db.Decimal(60, 4)
+  status_id      Int      @default(1)
+  data           DateTime @default(now()) @db.Timestamp(0)
+  usuario_id     Int      @default(1)
+  moeda_id       Int      @default(1)
+  codigo         String   @default(dbgenerated("(0)")) @db.Text
+  ean            String   @default(dbgenerated("(0)")) @db.Text
+  peso           Decimal  @default(1.000) @db.Decimal(60, 3)
+  estoque        Decimal  @default(0.000) @db.Decimal(60, 3)
+  estoqueminimo  Decimal  @default(1.000) @db.Decimal(60, 3)
+  consumomensal  Decimal  @default(1.000) @db.Decimal(60, 3)
+  unidade_id     Int      @default(1)
+  ultmocusto     Decimal  @default(0.000) @db.Decimal(60, 3)
+  estoquemaximo  Decimal  @default(100.000) @db.Decimal(60, 3)
+}
+
+model insumofornecedor {
+  id            Int       @id @default(autoincrement())
+  insumo_id     Int?
+  fornecedor_id Int?
+  nome          String    @db.Text
+  unidade       String    @db.Text
+  data          DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id    Int       @default(0)
+}
+
+model insumogrupo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model integracoes {
+  id     Int       @id @default(autoincrement())
+  key    String?   @db.VarChar(100)
+  secret String?   @db.VarChar(100)
+  api    String?   @db.VarChar(100)
+  status Int?
+  data   DateTime? @db.DateTime(0)
+}
+
+model laudoanalisematerialembalagemanexo {
+  id                               Int      @id @default(autoincrement())
+  laudoanalisematerialembalagem_id Int
+  ordemproducao_id                 Int
+  conformidades                    String?  @db.Text
+  memoria_calculo                  String?  @db.Text
+  status                           Int?
+  assinatura_analista              String?  @db.VarChar(255)
+  assinatura_conferido             String?  @db.VarChar(255)
+  data_analise                     DateTime @db.Date
+  data_analista                    DateTime @db.Date
+  data_conferido                   DateTime @db.Date
+  defeito_critico                  String?  @db.VarChar(255)
+  defeito_maior                    String?  @db.VarChar(255)
+  defeito_menor                    String?  @db.VarChar(255)
+}
+
+model laudoanalisemateriaprimaanexo {
+  id                          Int      @id @default(autoincrement())
+  laudoanalisemateriaprima_id Int
+  ordemproducao_id            Int
+  conformidades               String?  @db.Text
+  memoria_calculo             String?  @db.Text
+  status                      Int?
+  assinatura_analista         String?  @db.VarChar(255)
+  assinatura_conferido        String?  @db.VarChar(255)
+  data_analise                DateTime @db.Date
+  data_analista               DateTime @db.Date
+  data_conferido              DateTime @db.Date
+}
+
+model laudos_visualizados {
+  id                  Int       @id @default(autoincrement())
+  user_id             Int
+  documento_id        Int?
+  tipo_documento      Int
+  descricao_documento String?   @db.VarChar(255)
+  data_visualizacao   DateTime? @default(now()) @db.DateTime(0)
+}
+
+model leads {
+  id       BigInt    @id @default(autoincrement())
+  nome     String    @db.VarChar(255)
+  email    String?   @db.VarChar(255)
+  telefone String?   @db.VarChar(15)
+  canal    String    @db.VarChar(255)
+  criadoEm DateTime? @default(now()) @db.DateTime(0)
+}
+
+model loteinterno {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  ano        Int
+  mes        Int
+  sequencia  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  tipo       Int      @default(0)
+  status_id  Int      @default(1)
+}
+
+model materiaprima {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.Text
+  codigo               String   @db.Text
+  ultimocodigo         String?  @db.Text
+  cosmetico            String   @db.Text
+  codigoerp            String?  @db.Text
+  funcaoigredientes_id Int?
+  situacao             String?  @db.Text
+  fornecedor_id        Int?
+  custodereferencia    Decimal? @default(0.0000000000) @db.Decimal(65, 10)
+  moeda_id             Int?
+  customedio           Decimal? @default(0.0000000000) @db.Decimal(65, 10)
+  anotacoes            String?  @db.Text
+  sinonimia            String?  @db.Text
+  custoreal            Decimal? @default(0.0000000000) @db.Decimal(65, 10)
+  unidade_id           Int?
+  endereco             String?  @db.Text
+  ncm                  String?  @db.Text
+}
+
+model materiaprimaalergenicos {
+  id              Int     @id @default(autoincrement())
+  materiaprima_id Int
+  alergenicos_id  Int
+  percentual      Decimal @db.Decimal(10, 4)
+}
+
+model materiaprimaanexo {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  requisitotecnico String?  @db.Text
+  grupo            String?  @db.Text
+  anotacoes        String?  @db.Text
+  arquivo          String   @db.Text
+  materiaprima_id  Int
+  usuario_id       Int
+  data             DateTime @default(now()) @db.Timestamp(0)
+}
+
+model materiaprimacomponente {
+  id              Int      @id @default(autoincrement())
+  materiaprima_id Int
+  inci_id         Int
+  percentual      Decimal  @db.Decimal(10, 6)
+  cosmetico       String   @db.Text
+  data            DateTime @default(now()) @db.Timestamp(0)
+  usuario_id      Int
+}
+
+model materiaprimaespecificacoes {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.Text
+  materiaprima_id      Int
+  usuario_id           Int
+  especificacaostatus  String   @db.Text
+  oficializada         String   @db.Text
+  arquivada            String   @db.Text
+  parametrosanalise_id Int
+  metodologia          String?  @db.Text
+  especificacoes       String?  @db.Text
+  data                 DateTime @default(now()) @db.Timestamp(0)
+}
+
+model materiaprimafornecedores {
+  id              Int       @id @default(autoincrement())
+  materiaprima_id Int
+  fornecedor_id   Int
+  data            DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id      Int?
+  anotacoes       String?   @db.Text
+}
+
+model mensagem {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  mensagem   String   @db.Text
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  id_usuario Int
+  status_id  Int
+  lido       Int
+}
+
+model menu {
+  id        Int    @id @default(autoincrement())
+  nome      String @db.Text
+  status_id Int
+  icone_id  Int?
+}
+
+model moeda {
+  id                Int      @id @default(autoincrement())
+  nome              String   @db.Text
+  codigo            String   @db.Text
+  cotacao           Decimal  @default(0.0000) @db.Decimal(10, 4)
+  cambio            Decimal  @default(0.0000) @db.Decimal(10, 4)
+  ultimaatualizacao DateTime @default(now()) @db.Timestamp(0)
+}
+
+model naturezaoperacao {
+  id                Int      @id @default(autoincrement())
+  nome              String   @db.Text
+  cfopestadual      Int
+  cfopinterestadual Int
+  finnfe            Int
+  tipo              Int
+  sobrescrevecfop   Int
+  status_id         Int
+  data              DateTime @default(now()) @db.Timestamp(0)
+  usuario_id        Int
+}
+
+model ordemproducao {
+  id                     Int      @id @default(autoincrement())
+  nome                   String   @db.Text
+  produto_id             Int
+  fabricacao             DateTime @db.Date
+  validade               DateTime @db.Date
+  numeroreator           String   @db.Text
+  lote                   String   @db.Text
+  volumelote             String   @db.Text
+  tamanholote            Decimal  @db.Decimal(18, 8)
+  data                   DateTime @default(now()) @db.Timestamp(0)
+  usuario_id             Int
+  estoquebaixado         Int      @default(0)
+  ordemproducaostatus_id Int      @default(1)
+  observacao             String   @db.Text
+  unidade                String?  @default("g") @db.VarChar(5)
+  estoquesemiacabado     Decimal? @default(0.000) @db.Decimal(10, 3)
+  casas_decimais         Int?     @default(3)
+}
+
+model ordemproducaoanexo {
+  id               Int       @id @default(autoincrement())
+  nome             String?   @db.Text
+  ordemproducao_id Int
+  grupo            String?   @db.Text
+  usuario_id       Int?
+  data             DateTime? @default(now()) @db.Timestamp(0)
+  arquivo          String?   @db.Text
+}
+
+model ordemproducaoembalagem {
+  id               Int      @id @default(autoincrement())
+  estoqueinsumo_id Int
+  embalagem_id     Int
+  embalagemnome    String   @db.Text
+  embalagemcodigo  String   @db.Text
+  quantidade       Decimal  @db.Decimal(10, 4)
+  lote             String   @db.Text
+  estoque          Decimal  @db.Decimal(10, 4)
+  data             DateTime @default(now()) @db.Timestamp(0)
+  usuario_id       Int
+  ordemproducao_id Int
+}
+
+model ordemproducaoembalagens {
+  id               Int     @id @default(autoincrement())
+  nome             String? @db.Text
+  ordemproducao_id Int
+  embalagem_id     Int
+  quantidade       Decimal @db.Decimal(60, 3)
+}
+
+model ordemproducaomateriaprima {
+  id                 Int      @id @default(autoincrement())
+  estoqueinsumo_id   Int
+  materiaprima_id    Int
+  materiaprimanome   String   @db.Text
+  materiaprimacodigo Int
+  percentual         Decimal  @db.Decimal(18, 8)
+  quantidade         Decimal  @db.Decimal(18, 8)
+  lote               String   @db.Text
+  estoque            Decimal  @db.Decimal(18, 8)
+  data               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id         Int
+  ordemproducao_id   Int      @default(0)
+}
+
+model ordemproducaopapelao {
+  id               Int     @id @default(autoincrement())
+  ordemproducao_id Int
+  embalagem_id     Int
+  quantidade       Decimal @db.Decimal(10, 4)
+}
+
+model ordemproducaoprodutoversao {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  produtoversao_id Int
+  ordemproducao_id Int
+  quantidade       Decimal  @db.Decimal(60, 3)
+  lote             String   @db.Text
+  validade         DateTime @db.DateTime(0)
+  fabricacao       DateTime @db.DateTime(0)
+  data             DateTime @default(now()) @db.Timestamp(0)
+  usuario_id       Int
+  status_id        Int
+}
+
+model ordemproducaoprojecao {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  produto_id    Int
+  tamanhodolote Decimal  @db.Decimal(20, 3)
+  data          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id    Int
+}
+
+model ordemproducaoprojecaoversoes {
+  id         Int @id @default(autoincrement())
+  versao_id  Int
+  quantidade Int
+}
+
+model ordemproducaorotulo {
+  id               Int     @id @default(autoincrement())
+  ordemproducao_id Int
+  embalagem_id     Int
+  quantidade       Decimal @db.Decimal(10, 4)
+}
+
+model ordemproducaostatus {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model pais {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model parametrosanalise {
+  id              Int       @id @default(autoincrement())
+  nome            String    @db.Text
+  codigo          String?   @default(dbgenerated("(0)")) @db.Text
+  metodologia     String    @db.Text
+  especificacoes  String    @db.Text
+  tipoderesultado Int
+  data            DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id      Int?      @default(1)
+  status_id       Int
+}
+
+model pedido {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  cliente_id                  Int
+  financeiroformapagamento_id Int?
+  situacao_id                 Int
+  moeda_id                    Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+  status_id                   Int
+  pedidoromaneio_id           Int      @default(0)
+  observacoes                 String?  @db.Text
+  naturezaoperacao_id         Int?     @default(0)
+  frete                       Decimal? @default(0.00) @db.Decimal(60, 2)
+  modfrete                    Int?
+  transportador_id            Int?
+  volquantidade               Int?
+  volespecie                  String?  @db.Text
+  volnumero                   String?  @db.Text
+  refnfe                      String?  @db.Text
+  marca                       String?  @db.Text
+  pesoliquido                 Decimal? @db.Decimal(60, 3)
+  pesobruto                   Decimal? @db.Decimal(60, 3)
+  desconto                    Decimal? @db.Decimal(60, 2)
+  pedido_terceirizacao        Int?     @default(0) @db.TinyInt
+}
+
+model pedidocompra {
+  id                      Int      @id @default(autoincrement())
+  nome                    String?  @db.Text
+  fornecedor_id           Int
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  tipo                    String   @db.Text
+  empresa_id              Int
+  usuario_id              Int
+  atendente               String?  @db.Text
+  condicaopagamento       String   @db.Text
+  previsaoentrega         DateTime @db.DateTime(0)
+  moeda_id                Int      @default(1)
+  frete                   Decimal  @db.Decimal(10, 2)
+  pedidocomprasituacao_id Int      @default(1)
+  observacao              String?  @db.Text
+  fiscalnferecebimento_id Int?
+}
+
+model pedidocompraitens {
+  id              Int      @id @default(autoincrement())
+  nome            String   @db.Text
+  pedidocompra_id Int
+  idproduto       Int
+  codigo          String   @db.Text
+  quantidade      Decimal  @db.Decimal(65, 4)
+  valor           Decimal  @db.Decimal(65, 4)
+  valortotal      Decimal  @db.Decimal(65, 4)
+  icms            Decimal  @db.Decimal(65, 4)
+  ipi             Decimal  @db.Decimal(65, 4)
+  outros          Decimal  @db.Decimal(65, 4)
+  frete           Decimal  @default(0.0000) @db.Decimal(65, 4)
+  unidade_id      Int      @default(1)
+  moeda_id        Int      @default(1)
+  valorcambio     Decimal? @db.Decimal(65, 4)
+  valorparcial    Decimal  @default(0.0000) @db.Decimal(65, 4)
+}
+
+model pedidocompraregistrosituacao {
+  id                      Int      @id @default(autoincrement())
+  pedidocompra_id         Int
+  pedidocomprasituacao_id Int
+  observacao              String   @db.Text
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  usuario_id              Int
+}
+
+model pedidocomprasituacao {
+  id          Int    @id @default(autoincrement())
+  nome        String @db.Text
+  nivelacesso Int
+}
+
+model pedidocotacao {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.Text
+  fornecedor_id        Int
+  fornecedorcontato_id Int
+  data                 DateTime @default(now()) @db.Timestamp(0)
+  usuario_id           Int
+  cotacaosituacao_id   Int
+  status_id            Int
+}
+
+model pedidocotacaoitens {
+  id               Int     @id @default(autoincrement())
+  pedidocotacao_id Int
+  insumo_id        Int
+  unidade_id       Int
+  quantidade       String  @db.Text
+  valor            Decimal @db.Decimal(10, 4)
+  valortotal       Decimal @db.Decimal(10, 4)
+  moeda_id         Int     @default(0)
+  cambio           Decimal @db.Decimal(60, 3)
+  valorfinal       Decimal @db.Decimal(60, 3)
+}
+
+model pedidofabricacaoitensandamentofabricacao {
+  id                                 Int      @id @default(autoincrement())
+  nome                               String   @db.Text
+  pedidofabricacaoprojetosituacao_id Int
+  observacao                         String   @db.Text
+  status_id                          Int
+  data                               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                         Int
+  pedidoproducaoitens_id             Int
+  arquivo                            String?  @db.Text
+}
+
+model pedidofabricacaoitensandamentoprojeto {
+  id                                 Int      @id @default(autoincrement())
+  nome                               String   @db.Text
+  pedidofabricacaoprojetosituacao_id Int
+  observacao                         String   @db.Text
+  status_id                          Int
+  data                               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                         Int
+  pedidoproducaoitens_id             Int
+  arquivo                            String?  @db.Text
+}
+
+model pedidofabricacaoprojeto {
+  id                                 Int       @id @default(autoincrement())
+  nome                               String    @db.Text
+  observacao                         String?   @db.Text
+  datainicial                        DateTime? @db.DateTime(0)
+  datafinal                          DateTime? @db.DateTime(0)
+  pedidofabricacaoprojetosituacao_id Int
+  status_id                          Int
+  data                               DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id                         Int
+}
+
+model pedidofabricacaoprojetoandamento {
+  id                                 Int      @id @default(autoincrement())
+  nome                               String   @db.Text
+  pedidofabricacaoprojetosituacao_id Int
+  observacao                         String   @db.Text
+  status_id                          Int
+  data                               DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                         Int
+  arquivo                            String   @db.Text
+  pedidofabricacaoprojeto_id         Int
+}
+
+model pedidofabricacaoprojetoparticipantes {
+  id                         Int      @id @default(autoincrement())
+  nome                       String?  @db.Text
+  pedidofabricacaoprojeto_id Int
+  usuario_id                 Int
+  status_id                  Int
+  data                       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model pedidofabricacaoprojetopedidos {
+  id                         Int      @id @default(autoincrement())
+  nome                       String   @db.Text
+  pedidoproducao_id          Int
+  pedidofabricacaoprojeto_id Int
+  status_id                  Int
+  data                       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                 Int
+}
+
+model pedidofabricacaoprojetosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  tipo       Int?
+}
+
+model pedidoitens {
+  id               Int      @id @default(autoincrement())
+  produtoversao_id Int
+  quantidade       Decimal  @db.Decimal(60, 3)
+  lote             String   @db.Text
+  valor            Decimal  @db.Decimal(60, 3)
+  desconto         Decimal? @default(0.00) @db.Decimal(10, 2)
+  estoque_id       Int?
+  status_id        Int
+  data             DateTime @default(now()) @db.Timestamp(0)
+  usuario_id       Int
+  pedido_id        Int
+}
+
+model pedidoproducao {
+  id                                 Int       @id @default(autoincrement())
+  nome                               String    @db.Text
+  pedidotipo_id                      Int
+  pedidofabricacaoprojetosituacao_id Int
+  status_id                          Int
+  observacao                         String?   @db.Text
+  datainicial                        DateTime? @db.DateTime(0)
+  datafinal                          DateTime? @db.DateTime(0)
+  data                               DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id                         Int
+  cliente_id                         Int
+}
+
+model pedidoproducaoitens {
+  id                Int      @id @default(autoincrement())
+  nome              String   @db.Text
+  quantidade        Decimal  @db.Decimal(60, 3)
+  valorun           Decimal  @db.Decimal(60, 3)
+  valortotal        Decimal  @db.Decimal(60, 3)
+  pedidoproducao_id Int
+  status_id         Int
+  data              DateTime @default(now()) @db.Timestamp(0)
+  usuario_id        Int
+  produto_id        Int      @default(0)
+  produtovitrine_id Int      @default(0)
+}
+
+model pedidoproducaoitenscalculado {
+  id              BigInt @id @default(autoincrement())
+  item_id         Int
+  custo_formula   Float  @db.Float
+  custo_embalagem Float  @db.Float
+  ncm             String @db.VarChar(20)
+  custo_total     Float  @db.Float
+  fator           Float  @db.Float
+  quantidade      Float  @db.Float
+  preco           Float  @db.Float
+  st_ipi          Float  @db.Float
+  preco_final     Float  @db.Float
+}
+
+model pedidoromaneio {
+  id                        Int      @id @default(autoincrement())
+  nome                      String   @db.Text
+  placa                     String   @db.Text
+  datasaida                 DateTime @default(now()) @db.Timestamp(0)
+  data                      DateTime @default(now()) @db.Timestamp(0)
+  status_id                 Int
+  usuario_id                Int
+  responsavel               String   @db.Text
+  pedidoromaneiosituacao_id Int      @default(1)
+  transportador_id          Int?
+  observacao                String?  @db.Text
+}
+
+model pedidoromaneiosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model pedidoseparacao {
+  id                         Int       @id @default(autoincrement())
+  nome                       String    @db.Text
+  pedido_id                  Int
+  pedidoseparacaosituacao_id Int
+  datainicio                 DateTime? @db.Timestamp(0)
+  datafim                    DateTime? @db.Timestamp(0)
+  id_usuario                 Int?
+  data                       DateTime  @default(now()) @db.Timestamp(0)
+  status_id                  Int?
+  usuario_id                 Int
+}
+
+model pedidoseparacaoitens {
+  id                         Int      @id @default(autoincrement())
+  nome                       String   @db.Text
+  pedidoseparacao_id         Int
+  produtoversaoestoque_id    Int?
+  quantidade                 Int
+  lote                       String   @db.Text
+  pedidoseparacaosituacao_id Int
+  status_id                  Int
+  data                       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                 Int
+  pedidoitens_id             Int
+  produtoversao_id           Int
+}
+
+model pedidoseparacaosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model pedidosituacao {
+  id          Int    @id @default(autoincrement())
+  nome        String @db.Text
+  nivelacesso Int
+}
+
+model pedidotipo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model perfil {
+  id                     Int                      @id @default(autoincrement())
+  nome                   String                   @db.Text
+  nomefantasia           String?                  @db.Text
+  cnpj                   String                   @unique(map: "idx_perfil_cnpj") @db.Char(14)
+  cpf                    String?                  @db.Text
+  cep                    String?                  @db.Text
+  rua                    String?                  @db.Text
+  bairro                 String?                  @db.Text
+  cidade                 String?                  @db.Text
+  estado                 String?                  @db.Text
+  pais_id                Int?
+  ibge                   String?                  @db.Text
+  numero                 String?                  @db.Text
+  complemento            String?                  @db.Text
+  telefone               String?                  @db.Text
+  email                  String?                  @db.Text
+  ie                     String?                  @db.Text
+  suframa                String?                  @db.VarChar(15)
+  iest                   String?                  @db.Text
+  im                     String?                  @db.Text
+  cnae                   String?                  @db.Text
+  crt                    String?                  @db.Text
+  imagem                 String?                  @db.Text
+  certificado            String?                  @db.Text
+  certificadosenha       String?                  @db.Text
+  tpamb                  Int?                     @default(2)
+  numeronfe              Int?                     @default(0)
+  serienfe               String?                  @default("1") @db.Text
+  informacaofisco        String?                  @db.Text
+  informacaonfe          String?                  @db.Text
+  csrt_cnpj              String                   @db.VarChar(200)
+  csrt_telefone          String                   @db.VarChar(200)
+  csrt_email             String                   @db.VarChar(200)
+  csrt_homolog_token     String                   @db.Text
+  csrt_prod_token        String                   @db.Text
+  plugmarket_loja_config plugmarket_loja_config[]
+
+  @@index([csrt_cnpj], map: "idx_perfil_csrt_cnpj")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model perfilextra {
+  id                 Int       @id @default(autoincrement())
+  usuario_id         Int
+  numero_perfil      Int       @default(1)
+  nome               String?   @db.Text
+  nomefantasia       String?   @db.Text
+  cnpj               String    @db.Char(14)
+  cpf                String?   @db.Text
+  cep                String?   @db.Text
+  rua                String?   @db.Text
+  bairro             String?   @db.Text
+  cidade             String?   @db.Text
+  estado             String?   @db.Text
+  pais_id            String?   @default("1058") @db.Text
+  ibge               String?   @db.Text
+  numero             String?   @db.Text
+  complemento        String?   @db.Text
+  telefone           String?   @db.Text
+  email              String?   @db.Text
+  ie                 String?   @db.Text
+  iest               String?   @db.Text
+  im                 String?   @db.Text
+  cnae               String?   @db.Text
+  crt                String?   @db.Text
+  imagem             String?   @db.Text
+  certificado        String?   @db.Text
+  certificadosenha   String?   @db.Text
+  certificadodado    String?   @db.Text
+  tpamb              String?   @default("2") @db.Text
+  numeronfe          String?   @default("0") @db.Text
+  serienfe           String?   @default("1") @db.Text
+  informacaonfe      String?   @db.Text
+  informacaofisco    String?   @db.Text
+  csrt_cnpj          String?   @db.Text
+  csrt_telefone      String?   @db.Text
+  csrt_email         String?   @db.Text
+  csrt_homolog_token String?   @default("1") @db.Text
+  csrt_prod_token    String?   @db.Text
+  data_criacao       DateTime? @default(now()) @db.Timestamp(0)
+  data_atualizacao   DateTime? @default(now()) @db.Timestamp(0)
+
+  @@unique([usuario_id, numero_perfil], map: "unique_usuario_numero")
+  @@index([cnpj], map: "idx_perfilextra_cnpj")
+}
+
+model pesquisa {
+  id          Int      @id @default(autoincrement())
+  nome        String   @db.Text
+  descricao   String   @db.Text
+  datainicial DateTime @db.DateTime(0)
+  datafinal   DateTime @db.DateTime(0)
+  observacao  String   @db.Text
+  status_id   Int
+  data        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id  Int
+}
+
+model planos_erp {
+  id                 Int      @id @default(autoincrement())
+  nome               String   @db.VarChar(100)
+  descricao          String   @db.Text
+  grupo_form         Int
+  recursoslimitados  Int      @db.SmallInt
+  qtdeusuarios       Int
+  qtderegistros      Int
+  qtdefornecedores   Int
+  qtdemarca          Int
+  qtdeembalagem      Int
+  qtdeformulacao     Int
+  qtdemateriaprima   Int
+  qtdegrupoproduto   Int
+  qtdeprodutoacabado Int
+  qtdegrupoversao    Int
+  corpadrao          String   @default("913635") @db.VarChar(12)
+  valor              Float    @db.Float
+  oculto             Boolean? @default(false)
+}
+
+model plugmarket_loja_config {
+  id           Int       @id @default(autoincrement())
+  empresaId    Int?
+  cnpj         String?   @unique(map: "cnpj") @db.VarChar(20)
+  plugId       String?   @unique(map: "plugId") @db.VarChar(255)
+  tokenHub     String?   @db.Text
+  active       Int?      @db.TinyInt
+  accessToken  String?   @db.Text
+  refreshToken String?   @db.Text
+  createdAt    DateTime? @default(now()) @db.DateTime(0)
+  updatedAt    DateTime? @db.DateTime(0)
+  perfil       perfil?   @relation(fields: [empresaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK1_empresa_id")
+
+  @@index([empresaId], map: "FK1_empresa_id")
+}
+
+model produto {
+  id                           Int       @id @default(autoincrement())
+  nome                         String    @db.Text
+  codigo                       String    @db.Text
+  ultimocodigo                 String    @db.Text
+  grau                         String    @db.Text
+  aplicacaoenchague            String?   @db.Text
+  cosmetico                    String    @db.Text
+  finalidade                   String    @db.Text
+  anotacoes                    String?   @db.Text
+  lembretes                    String?   @db.Text
+  formulacao_id                Int
+  destinacao                   String?   @db.Text
+  produtogrupo_id              Int
+  produtoformafisica_id        Int
+  data                         DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id                   Int?
+  rendimento                   String?   @default(dbgenerated("(0)")) @db.Text
+  cuidadosconservacao          String?   @db.Text
+  restricaouso                 String?   @db.Text
+  classe_afe                   String?   @db.VarChar(255)
+  destinacaoproduto            String?   @db.VarChar(255)
+  destinacaoespecificaproduto  String?   @db.VarChar(255)
+  indicacao_publico_infantil   String?   @db.VarChar(255)
+  indicacao_gestantes          String?   @db.VarChar(255)
+  indicacao_pessoa_imobilizada String?   @db.VarChar(255)
+  indicacao_local              String?   @db.VarChar(255)
+  indicacao_pelesensivel       String?   @db.VarChar(255)
+  indicacao_peleclareadora     String?   @db.VarChar(255)
+  acao_antisseptica            String?   @db.VarChar(255)
+  acao_fotoprotetora           String?   @db.VarChar(255)
+  indicacao_acneica            String?   @db.VarChar(255)
+  acao_esfoliante              String?   @db.VarChar(255)
+  acao_antirruga               String?   @db.VarChar(255)
+  indicacao_epi                String?   @db.VarChar(255)
+  produtogruposolicita_id      Int?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model produtoacabado {
+  id                     Int      @id @default(autoincrement())
+  produto_id             Int
+  produtomarca_id        Int
+  produtoacabadolinha_id Int?
+  produtostatus_id       Int      @default(1)
+  data                   DateTime @db.DateTime(0)
+  usuario_id             Int
+  processo               String?  @db.VarChar(45)
+  linkpromocional        String?  @db.Text
+  texto                  String?  @db.Text
+  exibir_marca_qrcode    Boolean  @default(true)
+}
+
+model produtoacabadoexpecificacao {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.Text
+  produtoacabado_id    Int
+  usuario_id           Int
+  especificacaostatus  String   @db.Text
+  oficializada         String   @db.Text
+  arquivada            String   @db.Text
+  parametrosanalise_id Int
+  metodologia          String   @db.Text
+  especificacoes       String   @db.Text
+  data                 DateTime @default(now()) @db.Timestamp(0)
+}
+
+model produtoacabadolinha {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model produtoanexo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  arquivo    String   @db.Text
+  tipo       String   @db.Text
+  produto_id Int
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model produtoembalagem {
+  id           Int      @id @default(autoincrement())
+  produto_id   Int
+  embalagem_id Int
+  data         DateTime @default(now()) @db.Timestamp(0)
+  usuario_id   Int
+}
+
+model produtoexpecificacao {
+  id                   Int      @id @default(autoincrement())
+  nome                 String   @db.Text
+  produto_id           Int
+  usuario_id           Int
+  especificacaostatus  String   @db.Text
+  oficializada         String   @db.Text
+  arquivada            String   @db.Text
+  parametrosanalise_id Int
+  metodologia          String   @db.Text
+  especificacoes       String   @db.Text
+  data                 DateTime @default(now()) @db.Timestamp(0)
+}
+
+model produtoformafisica {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model produtogrupo {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model produtogruposolicita {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model produtomarca {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  imagem     String   @db.Text
+  data       DateTime @db.DateTime(0)
+  usuario_id Int
+}
+
+model produtostatus {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model produtoversao {
+  id                      Int       @id @default(autoincrement())
+  nome                    String    @db.Text
+  produtoacabado_id       Int
+  produtomarca_id         Int
+  codigo                  String    @db.Text
+  embalagem_idprimaria    Int
+  embalagem_idsecundaria  Int
+  destinacao              String    @db.Text
+  codigogtinean           String    @db.Text
+  codigocomercial         String    @db.Text
+  peso                    Decimal   @db.Decimal(10, 4)
+  produtostatus_id        Int?
+  lancamento              DateTime? @db.Date
+  orgaoregulador          String?   @db.Text
+  regularizacaoprocesso   String?   @db.Text
+  regularizacaoexpediente String?   @db.Text
+  regularizacaotransacao  String?   @db.Text
+  regularizacaovalidade   String?   @db.Text
+  regularizacao           String?   @db.Text
+  regularizado            Int?
+  versao                  String?   @db.Text
+  estoqueminimo           Decimal?  @default(0.000) @db.Decimal(60, 3)
+  estoquemaximo           Decimal?  @default(0.000) @db.Decimal(60, 3)
+  custo                   Decimal   @default(0.000) @db.Decimal(60, 3)
+  precodevenda            Decimal?  @default(10.000) @db.Decimal(60, 3)
+  dizeres_rotulagem       String?   @default("") @db.Text
+  modo_uso                String?   @default("") @db.Text
+}
+
+model produtoversaoanexo {
+  id               Int     @id @default(autoincrement())
+  nome             String? @db.Text
+  arquivo          String? @db.Text
+  tipo             String? @db.Text
+  produtoversao_id Int?
+  usuario_id       Int?
+  data             String? @db.Text
+}
+
+model produtoversaocarrinhocliente {
+  id               Int       @id @default(autoincrement())
+  cliente_id       Int
+  produtoversao_id Int
+  quantidade       Int
+  valor            Int
+  data             DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model produtoversaoembalagem {
+  id                    Int      @id @default(autoincrement())
+  produtoversao_id      Int
+  embalagem_id          Int
+  quantidade            Decimal  @db.Decimal(10, 4)
+  quantidadenaembalagem Decimal  @db.Decimal(10, 4)
+  data                  DateTime @default(now()) @db.Timestamp(0)
+  usuario_id            Int
+  resultado             Decimal  @default(0.0000) @db.Decimal(10, 4)
+}
+
+model produtoversaoestoque {
+  id               Int      @id @default(autoincrement())
+  nome             String   @db.Text
+  lote             String   @db.Text
+  quantidade       Decimal  @db.Decimal(60, 3)
+  vencimento       DateTime @db.DateTime(0)
+  fabricacao       DateTime @db.DateTime(0)
+  produtoversao_id Int
+  ordemproducao_id Int
+  status_id        Int
+  data             DateTime @default(now()) @db.Timestamp(0)
+  usuario_id       Int
+  situacaoestoque  Int      @default(1)
+}
+
+model produtoversaoestoquehistorico {
+  id                         Int      @id @default(autoincrement())
+  nome                       String   @db.Text
+  produtoversao_id           Int
+  produtoversaoestoque_id    Int
+  quantidade                 Decimal  @db.Decimal(60, 3)
+  lote                       String   @db.Text
+  saldo                      Decimal  @db.Decimal(60, 3)
+  status_id                  Int
+  data                       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                 Int
+  pedidoseparacaoitens_id    Int
+  pedidoitens_id             Int
+  pedido_id                  Int
+  justificativa              String   @db.Text
+  estoquetipomovimentacao_id Int
+}
+
+model produtoversaoestoqueintegracao {
+  id                      Int      @id @default(autoincrement())
+  nome                    String?  @db.Text
+  produtoversao_id        Int
+  produtoversaoestoque_id Int
+  quantidade              Decimal  @db.Decimal(60, 3)
+  lote                    String   @db.Text
+  vencimento              DateTime @db.DateTime(0)
+  fabricacao              DateTime @db.DateTime(0)
+  ordemproducao_id        Int
+  observacao              String   @db.Text
+  status_id               Int
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  usuario_id              Int
+  situacaoestoque         Int      @default(1)
+}
+
+model produtoversaorotulos {
+  id               Int       @id @default(autoincrement())
+  produtoversao_id Int
+  rotulo           String    @db.Text
+  created_at       DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model produtoversaotabelapreco {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.Text
+  status_id     Int
+  data          DateTime @default(now()) @db.Timestamp(0)
+  usuario_id    Int
+  descontoprazo Decimal  @default(0.00) @db.Decimal(65, 2)
+}
+
+model produtoversaotabelaprecoitens {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  valor                       Decimal  @default(0.000) @db.Decimal(60, 3)
+  acrescimo                   Decimal  @default(0.00) @db.Decimal(60, 2)
+  desconto                    Decimal  @default(0.00) @db.Decimal(60, 2)
+  valorvenda                  Decimal  @default(0.00) @db.Decimal(60, 2)
+  descontoprazo               Decimal  @default(0.00) @db.Decimal(60, 2)
+  status_id                   Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  usuario_id                  Int
+  produtoversao_id            Int      @default(0)
+  produtoversaotabelapreco_id Int      @default(0)
+  ordem                       Int      @default(1)
+}
+
+model produtovitrine {
+  id                     Int      @id @default(autoincrement())
+  nome                   String   @db.Text
+  imagem                 String?  @db.Text
+  texto                  String?  @db.Text
+  codigo                 String   @db.Text
+  data                   DateTime @default(now()) @db.Timestamp(0)
+  status_id              Int
+  usuario_id             Int
+  produtovitrinegrupo_id Int      @default(0)
+  observacao             String   @db.Text
+}
+
+model produtovitrinegrupo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model projetomodelotarefas {
+  id                Int      @id @default(autoincrement())
+  nome              String?  @db.Text
+  projetosmodelo_id Int
+  projetotarefas_id Int
+  status_id         Int
+  data              DateTime @default(now()) @db.Timestamp(0)
+  usuario_id        Int
+  ordem             Int      @default(0)
+}
+
+model projetos {
+  id                 Int       @id @default(autoincrement())
+  nome               String    @db.Text
+  texto              String    @db.Text
+  datainicioprevista DateTime  @db.DateTime(0)
+  datafinalprevista  DateTime  @db.DateTime(0)
+  datainicioreal     DateTime? @db.DateTime(0)
+  datarealfinal      DateTime? @db.DateTime(0)
+  projetosituacao_id Int
+  projetotipo_id     Int       @default(0)
+  status_id          Int
+  data               DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id         Int
+}
+
+model projetosituacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model projetosmodelo {
+  id             Int      @id @default(autoincrement())
+  nome           String   @db.Text
+  texto          String?  @db.Text
+  projetotipo_id Int      @default(0)
+  status_id      Int
+  data           DateTime @default(now()) @db.Timestamp(0)
+  usuario_id     Int
+}
+
+model projetotarefas {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  texto      String   @db.Text
+  duracao    Int
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model projetotipo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model projetovinculotarefa {
+  id                 Int       @id @default(autoincrement())
+  nome               String?   @db.Text
+  projetos_id        Int
+  projetotarefas_id  Int
+  status_id          Int
+  data               DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id         Int
+  ordem              Int       @default(0)
+  datainicioprevista DateTime? @db.Date
+  datafinalprevista  DateTime? @db.Date
+  datarealinicio     DateTime? @db.Date
+  datarealfinal      DateTime? @db.Date
+}
+
+model projetovinculotarefaandamento {
+  id                      Int      @id @default(autoincrement())
+  nome                    String   @db.Text
+  texto                   String?  @db.Text
+  arquivo                 String?  @db.Text
+  projetovinculotarefa_id Int
+  projetos_id             Int
+  status_id               Int
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  usuario_id              Int
+}
+
+model projetovinculotarefausuarios {
+  id                      Int      @id @default(autoincrement())
+  nome                    String?  @db.Text
+  projetovinculotarefa_id Int
+  usuario_id              Int
+  projetos_id             Int
+  status_id               Int
+  data                    DateTime @default(now()) @db.Timestamp(0)
+  arquivo                 String   @db.Text
+}
+
+model registronaoconformidade {
+  id         Int       @id @default(autoincrement())
+  nome       String    @db.Text
+  texto      String?   @db.Text
+  id_usuario Int?
+  datafinal  DateTime? @db.DateTime(0)
+  status_id  Int?
+  data       DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  arquivo    String?   @db.Text
+}
+
+model relatorio {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  parametro  String   @db.Text
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model relatoriocusto {
+  id                Int     @id @default(autoincrement())
+  nome              String  @db.Text
+  codigo            String  @db.Text
+  tipo              Int
+  customedio        Decimal @db.Decimal(10, 4)
+  custoreal         Decimal @db.Decimal(10, 4)
+  custodereferencia Decimal @db.Decimal(10, 4)
+}
+
+model situacao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+  status_id  Int
+}
+
+model status {
+  id   Int     @id @default(autoincrement())
+  nome String? @db.VarChar(45)
+}
+
+model statusestoqueinsumo {
+  id   Int    @id @default(autoincrement())
+  nome String @db.Text
+}
+
+model tendencias {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  descricao  String?  @db.Text
+  texto      String   @db.Text
+  imagem     String?  @db.Text
+  status_id  String   @db.Text
+  data       String   @db.Text
+  usuario_id String   @db.Text
+  datalimite DateTime @db.DateTime(0)
+}
+
+model terceirizacaoconfig {
+  id     Int    @id @default(autoincrement())
+  nome   String @db.VarChar(255)
+  config String @db.Text
+}
+
+model testeestabilidade {
+  id                       Int       @id @default(autoincrement())
+  formulacao_id            Int
+  tipo                     String    @db.Text
+  data                     DateTime  @default(now()) @db.Timestamp(0)
+  usuario_id               Int
+  origem                   String    @db.Text
+  lote                     String    @db.Text
+  fabricacao               DateTime  @db.DateTime(0)
+  vencimento               DateTime  @db.DateTime(0)
+  requisitotecnico         String    @db.Text
+  finalidade               String?   @db.Text
+  datainicio               DateTime  @db.DateTime(0)
+  datatermino              DateTime  @db.DateTime(0)
+  inicioefetivo            DateTime? @db.DateTime(0)
+  observacao               String?   @db.Text
+  parametrosanalise_id     String    @db.Text
+  periodicidade            Int       @default(1)
+  testeestabilidadetipo_id Int       @default(0)
+}
+
+model testeestabilidadeanalise {
+  id                       Int       @id @default(autoincrement())
+  testeestabilidade_id     Int
+  dataanalise              DateTime  @db.DateTime(0)
+  resultado                String    @db.Text
+  conslussao               String    @db.Text
+  aprovado                 String    @db.Text
+  situacao                 Int
+  parametrosanalise_id     Int
+  testeestabilidadetipo_id Int?      @default(0)
+  datateste                DateTime? @db.Date
+  horateste                DateTime? @db.Time(0)
+  especificacoes           String?   @db.Text
+}
+
+model testeestabilidadeanaliseanexo {
+  id                          Int      @id @default(autoincrement())
+  nome                        String   @db.Text
+  testeestabilidadeanalise_id Int
+  grupo                       String   @db.Text
+  usuario_id                  Int
+  data                        DateTime @default(now()) @db.Timestamp(0)
+  arquivo                     String   @db.Text
+}
+
+model testeestabilidadeanexo {
+  id                   Int       @id @default(autoincrement())
+  nome                 String?   @db.Text
+  testeestabilidade_id Int
+  grupo                String?   @db.Text
+  usuario_id           Int?
+  data                 DateTime? @default(now()) @db.Timestamp(0)
+  arquivo              String?   @db.Text
+}
+
+model testeestabilidadetipo {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model traducao {
+  id              Int      @id @default(autoincrement())
+  nome            String   @db.Text
+  codigo          String?  @db.Text
+  link            String?  @db.Text
+  texto           String?  @db.Text
+  data            DateTime @default(now()) @db.Timestamp(0)
+  usuario_id      Int
+  produtomarca_id Int?
+}
+
+model traducaoitens {
+  id          Int     @id @default(autoincrement())
+  traducao_id Int
+  inci_id     Int
+  inci        String? @db.Text
+  inciptbr    String? @db.Text
+}
+
+model transpostador {
+  id          Int     @id @default(autoincrement())
+  nome        String  @db.Text
+  cnpjcpf     String  @db.Text
+  cep         String  @db.Text
+  numero      String  @db.Text
+  complemento String  @db.Text
+  rua         String  @db.Text
+  bairro      String  @db.Text
+  cidade      String  @db.Text
+  estado      String  @db.Text
+  pais_id     String  @db.Text
+  placa       String  @db.Text
+  ibge        String? @db.Text
+}
+
+model unidade {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.Text
+  sigla         String    @db.Text
+  multiplicador Decimal   @db.Decimal(10, 4)
+  descricao     String?   @db.Text
+  data          DateTime? @default(now()) @db.Timestamp(0)
+  usuario_id    Int?
+}
+
+model upload {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  tabela     String   @db.Text
+  usuario_id Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model usuario {
+  id               Int       @id @default(autoincrement())
+  nome             String    @db.Text
+  usuario          String    @db.Text
+  password         String    @db.Text
+  usuariogrupo_id  Int
+  email            String    @db.Text
+  telefone         String    @db.Text
+  status_id        Int
+  cormenu          String?   @default("bg-gradient-dark") @db.Text
+  corhead          String?   @db.Text
+  corbody          String?   @db.Text
+  corfooter        String?   @db.Text
+  linhastabela     Int?      @default(10)
+  tamanhofonte     Int?      @default(100)
+  limitsql         Int?      @default(100)
+  sessao           String?   @db.Text
+  permissao        String?   @db.Text
+  imagem           String?   @default("sem_imagem.jpg") @db.Text
+  tempoinatividade Int?      @default(15)
+  iplocal          String?   @db.Text
+  cookieaceitoem   DateTime? @db.DateTime(0)
+  usuariofuncao_id String?   @db.Text
+}
+
+model usuarioagendalogin {
+  id             Int      @id @default(autoincrement())
+  nome           String   @db.Text
+  numerodasemana Int
+  horainicio     DateTime @db.Time(0)
+  horafinal      DateTime @db.Time(0)
+  usuario_id     Int
+  data           DateTime @default(now()) @db.Timestamp(0)
+  status_id      Int
+}
+
+model usuariofuncao {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  usuario_id Int
+}
+
+model usuariogrupo {
+  id        Int     @id @default(autoincrement())
+  nome      String  @db.Text
+  status_id Int
+  descricao String? @db.Text
+  permissao String? @db.Text
+}
+
+model usuariolog {
+  id             Int             @id @default(autoincrement())
+  usuario_id     Int?
+  data           DateTime?       @db.DateTime(0)
+  url            String?         @db.Text
+  label          String?         @db.Text
+  ip             String?         @db.Text
+  caminho        String?         @db.Text
+  acao           usuariolog_acao @default(ACESSO)
+  tabela_afetada String?         @db.VarChar(100)
+  registro_id    Int?
+  dados_antes    String?         @db.LongText
+  dados_depois   String?         @db.LongText
+}
+
+model vendedor {
+  id         Int      @id @default(autoincrement())
+  nome       String   @db.Text
+  usuario_id Int
+  status_id  Int
+  data       DateTime @default(now()) @db.Timestamp(0)
+  comissao   Decimal  @db.Decimal(60, 3)
+  meta       Decimal  @db.Decimal(60, 3)
+  gestor     Int      @default(0)
+}
+
+enum fiscalcreditopresumido_tipo {
+  IBS
+  CBS
+  AMBOS
+}
+
+enum fiscalclasstriib_tipo {
+  IBS
+  CBS
+  IS
+}
+
+enum fiscalcstibscbs_aplicacao {
+  IBS
+  CBS
+  AMBOS
+}
+
+enum usuariolog_acao {
+  ACESSO
+  INSERT
+  UPDATE
+  DELETE
+}
