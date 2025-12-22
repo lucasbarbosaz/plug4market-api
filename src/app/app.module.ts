@@ -4,9 +4,14 @@ import { AppService } from './app.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { Plug4MarketModule } from '../plug4market/plug4market.module';
 import { TenantsMiddleware } from 'src/common/middlewares/tenants.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [PrismaModule, Plug4MarketModule],
+  imports: [
+    PrismaModule,
+    Plug4MarketModule,
+    ScheduleModule.forRoot()
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

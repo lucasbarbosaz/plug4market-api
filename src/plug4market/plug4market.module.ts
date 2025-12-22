@@ -3,7 +3,7 @@ import { Plug4MarketService } from './plug4market.service';
 import { HttpModule } from '@nestjs/axios';
 import { Plug4MarketController } from './plug4market.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
-
+import { TokenRefreshTasks } from './tasks/token-refresh.task';
 @Module({
   imports: [
     HttpModule.register({
@@ -11,7 +11,10 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     }),
     PrismaModule
   ],
-  providers: [Plug4MarketService],
+  providers: [
+    Plug4MarketService,
+    TokenRefreshTasks
+  ],
   controllers: [Plug4MarketController],
   exports: [Plug4MarketService],
 })

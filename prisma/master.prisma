@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-master"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("MASTER_DATABASE_URL")
+}
+
+model Cliente {
+  id                 Int     @id @default(autoincrement())
+  nome               String
+  cnpj               String
+  responsavel        String?
+  telefone           String?
+  celular            String?
+  email              String?
+  cep                String?
+  rua                String?
+  bairro             String?
+  cidade             String?
+  estado             String?
+  pais               String?
+  numero             String?
+  complemento        String?
+  host               String?
+  bancodedados       String?
+  usuariobd          String?
+  senhabd            String?
+  pastadados         String?
+  urlsite            String?
+  modooperacao       String?
+  corpadrao          String?
+  usuario            String?
+  senha              String?
+  formulariogrupo_id Int
+  recursoslimitados  Int?
+  qtdeusuarios       String?
+  qtderegistros      String?
+  qtdefornecedores   Int?
+  qtdemarca          Int?
+  qtdeembalagem      Int?
+  qtdeformulacao     Int?
+  qtdemateriaprima   Int?
+  qtdegrupoproduto   Int?
+  qtdeprodutoacabado Int?
+  qtdegrupoversao    Int?
+  observacao         String?
+  status_id          Int?    @default(1)
+  qtdecnpj           Int?    @default(1)
+
+  @@map("clientes")
+}
+
+model alerta {
+  id          Int     @id @default(autoincrement())
+  clientes_id Int?
+  alerta      String?
+  status      Int?
+  data        String?
+}
+
+model anuncio {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  autor      String
+  texto      String
+  data       DateTime
+  vencimento DateTime
+  largura    Int
+  status_id  Int
+}
+
+model contratoaceite {
+  id           Int       @id @default(autoincrement())
+  contratos_id String
+  clientes_id  String
+  dataaceite   DateTime?
+}
+
+model contratos {
+  id             Int       @id @default(autoincrement())
+  nome           String
+  texto          String
+  datavencimento DateTime?
+  data           DateTime?
+  status_id      Int?
+}
+
+model formulariogrupo {
+  id          Int    @id @default(autoincrement())
+  nome        String
+  status_id   Int
+  descricao   String
+  formularios String
+}
+
+model fornecedorglobal {
+  id           Int     @id @default(autoincrement())
+  nome         String
+  nomefantasia String
+  codigo       String
+  rua          String?
+  bairro       String?
+  cidade       String?
+  estado       String?
+  cep          String?
+  pais         String?
+  telefone     String?
+  fax          String?
+  site         String?
+  observacao   String?
+  cnpj_cpf     String?
+  ie           String?
+  email        String?
+  status_id    Int?
+}
+
+model funcaoigredientesglobal {
+  id        Int     @id @unique(map: "sqlite_autoindex_funcaoigredientesglobal_1") @default(autoincrement())
+  nome      String
+  nomeptbr  String?
+  definicao String?
+}
+
+model inciglobal {
+  id                         Int     @id @unique(map: "sqlite_autoindex_inciglobal_1") @default(autoincrement())
+  nome                       String
+  nomeptbr                   String
+  funcaoigredientesglobal_id Int
+  referencia                 String?
+  lembretes                  String?
+  anotacoes                  String?
+}
+
+model pesquisa {
+  id          Int       @id @unique(map: "sqlite_autoindex_pesquisa_1") @default(autoincrement())
+  nome        String?
+  descricao   String?
+  datainicial DateTime?
+  datafinal   DateTime?
+  observacao  String?
+  status_id   Int?      @default(1)
+  data        DateTime?
+  usuario_id  Int?
+}
+
+model pesquisaclientes {
+  id          Int  @id @unique(map: "sqlite_autoindex_pesquisaclientes_1") @default(autoincrement())
+  pesquisa_id Int?
+  clientes_id Int?
+}
+
+model pesquisapergunta {
+  id          Int     @id @unique(map: "sqlite_autoindex_pesquisapergunta_1") @default(autoincrement())
+  nome        String?
+  pesquisa_id Int?
+  check       String?
+}
+
+model pesquisarespondida {
+  id                  Int       @id @unique(map: "sqlite_autoindex_pesquisarespondida_1") @default(autoincrement())
+  nome                String?
+  observacao          String?
+  check               String?
+  pesquisapergunta_id Int?
+  data                DateTime?
+  clientes_id         Int?
+  usuario_id          Int?
+  respostasituacao_id Int?
+  usuarionome         String?
+}
+
+model pesquisarespostas {
+  id                  Int     @id @unique(map: "sqlite_autoindex_pesquisarespostas_1") @default(autoincrement())
+  nome                String?
+  pesquisapergunta_id Int?
+  check               String?
+}
+
+model pesquisausuario {
+  id                  Int       @id @unique(map: "sqlite_autoindex_pesquisausuario_1") @default(autoincrement())
+  pesquisa_id         Int?
+  clientes_id         Int?
+  usuario_id          Int?
+  pesquisasituacao_id Int?
+  data                DateTime?
+  usuarionome         String?
+}

@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { HttpStatus } from '@nestjs/common';
 import { TenantService } from 'src/prisma/tenants.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { ListProductsDto } from './dto/list-products.dto';
 
 @Injectable()
 export class Plug4MarketService {
@@ -17,7 +19,7 @@ export class Plug4MarketService {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly TenantService: TenantService
+    private readonly tenantService: TenantService
   ) { }
 
   private async getAuthToken(): Promise<string> {
@@ -80,7 +82,7 @@ export class Plug4MarketService {
 
       const tokenStore = await this.createTokenStore(createStoreDto.cnpj, createStoreDto.cnpjSH);
 
-      const prisma = await this.TenantService.getTenantClient(tenantName);
+      const prisma = await this.tenantService.getTenantClient(tenantName);
 
       const novaLoja = await prisma.plugmarket_loja_config.create({
         data: {
@@ -133,6 +135,97 @@ export class Plug4MarketService {
     } catch (error) {
       this.logger.error(
         'Erro ao criar token de loja no Plug4Market',
+        error?.response?.data || error.message,
+      );
+
+      if (error.response) {
+        throw new HttpException(
+          error.response.data,
+          error.response.status,
+        );
+      }
+      throw error;
+    }
+  }
+
+  public async createProduct(createProductDto: CreateProductDto, tenantName: string) {
+    this.logger.log('Iniciando criação de produto no Plug4Market');
+
+    const prisma = await this.tenantService.getTenantClient(tenantName);
+
+    const config = await prisma.plugmarket_loja_config.findFirst({
+      where: { active: 1 }
+    });
+
+    if (!config || !config.accessToken) {
+      throw new HttpException(`Loja ${tenantName} não está integrada ou token inválido.`, HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('/products', createProductDto, {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+          },
+        }),
+      );
+
+      this.logger.log(`Plug4Market Response Status: ${response.status}`);
+      this.logger.log(`Plug4Market Response Data: ${JSON.stringify(response.data)}`);
+
+      const { data } = response;
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      this.logger.error(
+        'Erro ao criar produto no Plug4Market',
+        error?.response?.data || error.message,
+      );
+
+      if (error.response) {
+        throw new HttpException(
+          error.response.data,
+          error.response.status,
+        );
+      }
+      throw error;
+    }
+  }
+
+  public async listAllProducts(listProductsDto: ListProductsDto, tenantName: string) {
+    this.logger.log('Iniciando listagem de produtos no Plug4Market');
+
+    const prisma = await this.tenantService.getTenantClient(tenantName);
+
+    const config = await prisma.plugmarket_loja_config.findFirst({
+      where: { active: 1 }
+    });
+
+    if (!config || !config.accessToken) {
+      throw new HttpException(`Loja ${tenantName} não está integrada ou token inválido.`, HttpStatus.UNAUTHORIZED);
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get('/products', {
+          headers: {
+            Authorization: `Bearer ${config.accessToken}`,
+          },
+          params: listProductsDto,
+        }),
+      );
+
+      this.logger.log(`Plug4Market Response Status: ${response.status}`);
+      this.logger.log(`Plug4Market Response Data: ${JSON.stringify(response.data)}`);
+
+      const { data } = response;
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      this.logger.error(
+        'Erro ao listar produtos no Plug4Market',
         error?.response?.data || error.message,
       );
 
