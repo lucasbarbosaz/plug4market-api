@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Patch, Query, Param } from '@nestjs/common';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { Plug4MarketService } from './plug4market.service';
 import { TypedHeaders } from './decorators/typed-headers.decorator';
 import { TenantHeadersDto } from './dto/headers.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { SkuDto } from './dto/sku.dto';
 
 @Controller('plug4market')
 export class Plug4MarketController {
@@ -26,5 +28,15 @@ export class Plug4MarketController {
   @Get('products')
   async getProducts(@Query() listProductsDto: ListProductsDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
     return this.plug4marketService.listAllProducts(listProductsDto, headers.tenantName);
+  }
+
+  @Patch('products/:sku')
+  async updateProduct(@Body() updateProductDto: UpdateProductDto, @Param() skuDto: SkuDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
+    return this.plug4marketService.updateProduct(updateProductDto, skuDto, headers.tenantName);
+  }
+
+  @Delete('products/:sku')
+  async deleteProduct(@Param() deleteProductDto: SkuDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
+    return this.plug4marketService.deleteProduct(deleteProductDto, headers.tenantName);
   }
 }
