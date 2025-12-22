@@ -1,8 +1,9 @@
+// src/modules/plug4market/tasks/token-refresh.task.ts
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 import { TenantService } from '../../prisma/tenants.service';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class TokenRefreshTasks {
@@ -10,84 +11,27 @@ export class TokenRefreshTasks {
 
   constructor(
     private readonly tenantService: TenantService,
-    private readonly httpService: HttpService
+    @InjectQueue('token-refresh') private readonly tokenQueue: Queue,
   ) { }
 
-  // Roda de hora em hora para verificar quem precisa de refresh
   @Cron(CronExpression.EVERY_HOUR)
   async handleTokenRefresh() {
-    this.logger.log('Iniciando rotina de verificação de tokens...');
+    this.logger.log('Buscando clientes ativos no SQLite para agendar refresh...');
 
-
+    // Busca slugs (pastadados) do banco Master (SQLite)
     const allTenantIds = await this.tenantService.getAllActiveTenantIds();
 
     for (const tenantId of allTenantIds) {
-      try {
-        const isConnected = await this.tenantService.testConnection(tenantId);
-        if (!isConnected) {
-          //this.logger.warn(`Pular tenant ${tenantId} - Falha na conexão com banco de dados.`);
-          continue;
+      await this.tokenQueue.add(
+        'refresh-job',
+        { tenantId },
+        {
+          attempts: 3, // Se falhar por erro de rede, tenta 3 vezes
+          backoff: 5000 // Espera 5 segundos entre tentativas
         }
-
-        await this.checkAndRefreshTokenForTenant(tenantId);
-      } catch (error) {
-        this.logger.error(`Erro ao processar tenant ${tenantId}`, error.stack);
-      }
-    }
-  }
-
-  private async checkAndRefreshTokenForTenant(tenantId: string) {
-    const prisma = await this.tenantService.getTenantClient(tenantId);
-
-
-    const config = await prisma.plugmarket_loja_config.findFirst({
-      where: {
-        active: 1,
-        refreshToken: { not: null }
-      }
-    });
-
-
-    if (!config || !config.refreshToken) return;
-
-    console.log(config);
-
-    let lastUpdate: Date;
-
-    if (config.updatedAt) {
-      lastUpdate = config.updatedAt;
-    } else if (config.createdAt) {
-      lastUpdate = config.createdAt;
-    } else {
-      lastUpdate = new Date(0);
-    }
-
-    const now = new Date();
-
-    const diffInHours = (now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60);
-
-    if (diffInHours >= 23) {
-      this.logger.log(`Renovando token para o tenant: ${tenantId}`);
-      const response = await firstValueFrom(
-        this.httpService.post('/auth/refresh', {
-          refreshToken: config.refreshToken
-        })
       );
-
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-      await prisma.plugmarket_loja_config.update({
-        where: { id: config.id },
-        data: {
-          accessToken: accessToken,
-          refreshToken: newRefreshToken,
-          updatedAt: new Date(),
-        },
-      });
-
-      this.logger.log(`Token renovado com sucesso para ${tenantId}`);
-    } else {
-      this.logger.log(`Token não renovado para ${tenantId} - ${diffInHours} horas`);
     }
+
+    this.logger.log(`${allTenantIds.length} tarefas de refresh adicionadas à fila.`);
   }
 }

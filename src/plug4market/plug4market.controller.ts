@@ -20,15 +20,16 @@ export class Plug4MarketController {
     return this.plug4marketService.createNewStore(createStoreDto, headers.tenantName);
   }
 
+  @Get('products')
+  async getProducts(@Query() listProductsDto: ListProductsDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
+    return this.plug4marketService.listAllProducts(listProductsDto, headers.tenantName);
+  }
+
   @Post('products')
   async createProduct(@Body() createProductDto: CreateProductDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
     return this.plug4marketService.createProduct(createProductDto, headers.tenantName);
   }
 
-  @Get('products')
-  async getProducts(@Query() listProductsDto: ListProductsDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
-    return this.plug4marketService.listAllProducts(listProductsDto, headers.tenantName);
-  }
 
   @Patch('products/:sku')
   async updateProduct(@Body() updateProductDto: UpdateProductDto, @Param() skuDto: SkuDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
