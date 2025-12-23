@@ -17,6 +17,7 @@ export class TokenProcessor {
 
   @Process('refresh-job')
   async handleRefresh(job: Job<{ tenantId: string }>) {
+    console.log("Iniciando renovação de token");
     const { tenantId } = job.data;
 
     try {
@@ -35,6 +36,8 @@ export class TokenProcessor {
         },
       });
 
+      console.log(config);
+
       if (!config) return;
 
       const lastUpdate = config.updatedAt || config.createdAt || new Date(0);
@@ -44,10 +47,12 @@ export class TokenProcessor {
         this.logger.log(`[${tenantId}] Iniciando renovação de token (Idade: ${diffInHours.toFixed(1)}h)`);
 
         const response = await firstValueFrom(
-          this.httpService.post('https://api.plug4market.com.br/auth/refresh', {
+          this.httpService.post('https://api.sandbox.plug4market.com.br/auth/refresh', {
             refreshToken: config.refreshToken,
           })
         );
+
+        console.log(response);
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 

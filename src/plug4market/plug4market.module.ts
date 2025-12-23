@@ -7,7 +7,9 @@ import { BullModule } from '@nestjs/bull';
 import { TokenRefreshTasks } from './tasks/token-refresh.task';
 import { TokenProcessor } from './processors/token.processor';
 import { HttpConfigService } from '../common/http/http-config.service';
-
+import { ApiExceptionFilter } from '../common/filters/exception-filter';
+import { APP_FILTER } from '@nestjs/core';
+import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     HttpModule.register({
@@ -20,13 +22,19 @@ import { HttpConfigService } from '../common/http/http-config.service';
         max: 5,         // No máximo 5 processos
         duration: 60000 // A cada 1 minuto (60.000 ms)
       },
+
     }),
+    AuthModule
   ],
   providers: [
     Plug4MarketService,
     TokenRefreshTasks,
     TokenProcessor,
-    HttpConfigService
+    HttpConfigService,
+    {
+      provide: APP_FILTER,
+      useClass: ApiExceptionFilter
+    }
   ],
   controllers: [Plug4MarketController],
   exports: [Plug4MarketService],

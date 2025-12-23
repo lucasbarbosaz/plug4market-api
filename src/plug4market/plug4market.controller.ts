@@ -1,13 +1,18 @@
-import { Body, Controller, Delete, Get, Post, Patch, Query, Param } from '@nestjs/common';
-import { CreateStoreDto } from './dto/create-store.dto';
+import { Body, Controller, Delete, Get, Post, Patch, Query, Param, UseGuards } from '@nestjs/common';
 import { Plug4MarketService } from './plug4market.service';
 import { TypedHeaders } from './decorators/typed-headers.decorator';
-import { TenantHeadersDto } from './dto/headers.dto';
+import { TenantHeadersDto } from '../common/dto/headers.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { SkuDto } from './dto/sku.dto';
+import { AuthTokenGuard } from 'src/auth/guard/auth-token.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/enums/role.enum';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
+@UseGuards(AuthTokenGuard, RolesGuard)
+@Roles(Role.SUPER_ADMIN)
 @Controller('plug4market')
 export class Plug4MarketController {
 
@@ -15,10 +20,6 @@ export class Plug4MarketController {
     private readonly plug4marketService: Plug4MarketService
   ) { }
 
-  @Post()
-  async createStore(@Body() createStoreDto: CreateStoreDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {
-    return this.plug4marketService.createNewStore(createStoreDto, headers.tenantName);
-  }
 
   @Get('products')
   async getProducts(@Query() listProductsDto: ListProductsDto, @TypedHeaders(TenantHeadersDto) headers: TenantHeadersDto) {

@@ -188,3 +188,12 @@ model pesquisausuario {
   data                DateTime?
   usuarionome         String?
 }
+
+model SuperUser {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String
+  role         String   @default("super_admin")
+  createdAt    DateTime @default(now())
+  refreshToken String?
+}

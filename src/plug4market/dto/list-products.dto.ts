@@ -7,109 +7,109 @@ export class ListProductsDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  _page?: number = 1;
+  readonly _page?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  size?: number = 10;
+  readonly size?: number = 10;
 
   @IsOptional()
   @IsString()
-  q?: string;
+  readonly q?: string;
 
   @IsOptional()
   @IsString()
-  brand?: string;
+  readonly brand?: string;
 
   @IsOptional()
   @IsString()
-  ncm?: string;
+  readonly ncm?: string;
 
   @IsOptional()
   @IsString()
-  ean?: string;
+  readonly ean?: string;
 
   @IsOptional()
   @IsString()
-  sku?: string;
+  readonly sku?: string;
   @IsOptional()
   @IsString()
-  productId?: string;
+  readonly productId?: string;
 
   @IsOptional()
   @IsString()
-  customId?: string;
+  readonly customId?: string;
 
   @IsOptional()
   @IsString()
-  categoryId?: string;
+  readonly categoryId?: string;
 
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  priceGte?: number;
+  readonly priceGte?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  priceLte?: number;
+  readonly priceLte?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  minimumStock?: number;
+  readonly minimumStock?: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  salesChannels?: number;
+  readonly salesChannels?: number;
 
   @IsOptional()
   @IsString()
-  salesChannelStatus?: string;
+  readonly salesChannelStatus?: string;
 
   @IsOptional()
   @IsISO8601()
-  createdStartDate?: string;
+  readonly createdStartDate?: string;
 
   @IsOptional()
   @IsISO8601()
-  createdEndDate?: string;
+  readonly createdEndDate?: string;
 
   @IsOptional()
   @IsISO8601()
-  updatedStartDate?: string;
+  readonly updatedStartDate?: string;
 
   @IsOptional()
   @IsISO8601()
-  updatedEndDate?: string;
+  readonly updatedEndDate?: string;
 
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
-  active?: boolean = true;
+  readonly active?: boolean = true;
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
-  hasImage?: boolean;
+  readonly hasImage?: boolean;
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
-  outOfStock?: boolean;
+  readonly outOfStock?: boolean;
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
-  store?: boolean;
+  readonly store?: boolean;
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
-  onlyError?: boolean;
+  readonly onlyError?: boolean;
 }

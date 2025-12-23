@@ -16,22 +16,26 @@ export class TokenRefreshTasks {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleTokenRefresh() {
-    this.logger.log('Buscando clientes ativos no SQLite para agendar refresh...');
+    try {
+      this.logger.log('Buscando clientes ativos no SQLite para agendar refresh...');
 
-    // Busca slugs (pastadados) do banco Master (SQLite)
-    const allTenantIds = await this.tenantService.getAllActiveTenantIds();
+      // Busca slugs (pastadados) do banco Master (SQLite)
+      const allTenantIds = await this.tenantService.getAllActiveTenantIds();
 
-    for (const tenantId of allTenantIds) {
-      await this.tokenQueue.add(
-        'refresh-job',
-        { tenantId },
-        {
-          attempts: 3, // Se falhar por erro de rede, tenta 3 vezes
-          backoff: 5000 // Espera 5 segundos entre tentativas
-        }
-      );
+      for (const tenantId of allTenantIds) {
+        await this.tokenQueue.add(
+          'refresh-job',
+          { tenantId },
+          {
+            attempts: 3, // Se falhar por erro de rede, tenta 3 vezes
+            backoff: 5000 // Espera 5 segundos entre tentativas
+          }
+        );
+      }
+
+      this.logger.log(`${allTenantIds.length} tarefas de refresh adicionadas à fila.`);
+    } catch (error) {
+      this.logger.error('Erro ao executar job de refresh:', error);
     }
-
-    this.logger.log(`${allTenantIds.length} tarefas de refresh adicionadas à fila.`);
   }
 }

@@ -2070,6 +2070,7 @@ model perfil {
   csrt_email             String                   @db.VarChar(200)
   csrt_homolog_token     String                   @db.Text
   csrt_prod_token        String                   @db.Text
+  token_api              String                   @db.Text
   plugmarket_loja_config plugmarket_loja_config[]
 
   @@index([csrt_cnpj], map: "idx_perfil_csrt_cnpj")
@@ -2163,6 +2164,7 @@ model plugmarket_loja_config {
   active       Int?      @db.TinyInt
   accessToken  String?   @db.Text
   refreshToken String?   @db.Text
+  token_api    String?   @db.Text
   createdAt    DateTime? @default(now()) @db.DateTime(0)
   updatedAt    DateTime? @db.DateTime(0)
   perfil       perfil?   @relation(fields: [empresaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK1_empresa_id")

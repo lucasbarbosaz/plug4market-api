@@ -4,202 +4,202 @@ import { Type } from 'class-transformer';
 
 export class SalesChannelDto {
   @IsNumber()
-  id: number;
+  readonly id: number;
 
   @IsNumber()
   @IsOptional()
-  price: number;
+  readonly price: number;
 }
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
-  productId: string; // ID do produto no SEU ERP
+  readonly productId: string; // ID do produto no SEU ERP
 
   @IsString()
   @IsNotEmpty()
-  sku: string; // SKU único
+  readonly sku: string; // SKU único
 
   @IsString()
   @IsNotEmpty()
-  name: string; // Título do anúncio
+  readonly name: string; // Título do anúncio
 
   @IsString()
   @IsNotEmpty()
-  productName: string; // Nome do agrupador
+  readonly productName: string; // Nome do agrupador
 
   @IsNumber()
-  price: number; // Preço base
+  readonly price: number; // Preço base
 
   @IsNumber()
-  stock: number; // Estoque inicial
+  readonly stock: number; // Estoque inicial
 
   @IsString()
-  description: string; // Aceita HTML
+  readonly description: string; // Aceita HTML
 
   // Dimensões e Peso
   @IsNumber()
-  weight: number;
+  readonly weight: number;
 
   @IsNumber()
-  width: number;
+  readonly width: number;
 
   @IsNumber()
-  height: number;
+  readonly height: number;
 
   @IsNumber()
-  length: number;
+  readonly length: number;
 
   @IsString()
-  brand: string;
+  readonly brand: string;
 
   @IsOptional()
   @IsString()
-  ean: string;
+  readonly ean: string;
 
   @IsOptional()
   @IsString()
-  ncm: string;
+  readonly ncm: string;
 
   @IsOptional()
   @IsBoolean()
-  active: boolean;
+  readonly active: boolean;
 
   @IsOptional()
   @IsString()
-  anatelCode: string;
+  readonly anatelCode: string;
 
   @IsOptional()
   @IsString()
-  anvisaCode: string;
+  readonly anvisaCode: string;
 
   @IsOptional()
   @IsString()
-  categoryId: string;
+  readonly categoryId: string;
 
   @IsOptional()
   @IsString()
-  cest: string;
+  readonly cest: string;
 
   @IsOptional()
   @IsString()
-  color: string;
+  readonly color: string;
 
   @IsOptional()
   @IsEnum(['novo', 'usado'])
-  condition: string;
+  readonly condition: string;
 
   @IsOptional()
   @IsNumber()
-  costPrice: number;
+  readonly costPrice: number;
 
   @IsOptional()
   @IsNumber()
-  crossDockingDays: number;
+  readonly crossDockingDays: number;
 
   @IsOptional()
   @IsString()
-  csosn: string;
+  readonly csosn: string;
 
   @IsOptional()
-  customCategory: any; // Object
-
-  @IsOptional()
-  @IsString()
-  customId: string;
+  readonly customCategory: any; // Object
 
   @IsOptional()
   @IsString()
-  ex_tipi: string;
+  readonly customId: string;
 
   @IsOptional()
   @IsString()
-  fci: string;
+  readonly ex_tipi: string;
 
   @IsOptional()
   @IsString()
-  flavor: string;
+  readonly fci: string;
+
+  @IsOptional()
+  @IsString()
+  readonly flavor: string;
 
   @IsOptional()
   @IsEnum(['masculino', 'feminino', 'menino', 'menina', 'unissex', 'bebe'])
-  gender: string;
+  readonly gender: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  images: string[];
+  readonly images: string[];
 
   @IsOptional()
   @IsString()
-  inmetroCode: string;
+  readonly inmetroCode: string;
 
   @IsOptional()
   @IsString()
-  manufacturerPartNumber: string;
+  readonly manufacturerPartNumber: string;
 
   @IsOptional()
   @IsString()
-  mapaCode: string;
+  readonly mapaCode: string;
 
   @IsOptional()
   @IsEnum(['un', 'kg', 'g', 'mg', 'm', 'm²', 'm³', 'cm', 'cm²', 'cm³', 'mm', 'mm²', 'mm³', 'oz', 'lb', 'ft', 'ft²', 'ft³', 'in', 'in²', 'in³'])
-  measurementUnit: string;
+  readonly measurementUnit: string;
 
   @IsOptional()
   @IsArray()
-  metafields: any[]; // Array of objects
+  readonly metafields: any[]; // Array of objects
 
   @IsOptional()
   @IsString()
-  model: string;
+  readonly model: string;
 
   @IsOptional()
   @IsString()
-  modelo: string; // ID
+  readonly modelo: string; // ID
 
   @IsOptional()
   @IsEnum(['nacional', 'importado'])
-  origin: string;
+  readonly origin: string;
 
   @IsOptional()
   @IsString()
-  potency: string;
+  readonly potency: string;
 
   @IsOptional()
   @IsBoolean()
-  reviewed: boolean;
+  readonly reviewed: boolean;
 
   @IsOptional()
   @IsString()
-  saleDateEnd: string;
+  readonly saleDateEnd: string;
 
   @IsOptional()
   @IsString()
-  saleDateStart: string;
+  readonly saleDateStart: string;
 
   @IsOptional()
   @IsNumber()
-  salePrice: number;
+  readonly salePrice: number;
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SalesChannelDto)
-  salesChannels: SalesChannelDto[];
+  readonly salesChannels: SalesChannelDto[];
 
   @IsOptional()
   @IsString()
-  size: string;
+  readonly size: string;
 
   @IsOptional()
   @IsNumber()
-  unitMultiplier: number;
+  readonly unitMultiplier: number;
 
   @IsOptional()
   @IsString()
-  voltage: string;
+  readonly voltage: string;
 
   @IsOptional()
   @IsNumber()
-  warranty: number;
+  readonly warranty: number;
 }
