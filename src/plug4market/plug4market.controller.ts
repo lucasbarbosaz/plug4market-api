@@ -12,7 +12,7 @@ import { Role } from 'src/common/enums/role.enum';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @UseGuards(AuthTokenGuard, RolesGuard)
-@Roles(Role.SUPER_ADMIN)
+@Roles(Role.OWNER_STORE)
 @Controller('plug4market')
 export class Plug4MarketController {
 
