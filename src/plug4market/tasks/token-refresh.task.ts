@@ -19,7 +19,6 @@ export class TokenRefreshTasks {
     try {
       this.logger.log('Buscando clientes ativos no SQLite para agendar refresh...');
 
-      // Busca slugs (pastadados) do banco Master (SQLite)
       const allTenantIds = await this.tenantService.getAllActiveTenantIds();
 
       for (const tenantId of allTenantIds) {

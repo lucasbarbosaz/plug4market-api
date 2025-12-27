@@ -2165,11 +2165,14 @@ model plugmarket_loja_config {
   accessToken  String?   @db.Text
   refreshToken String?   @db.Text
   token_api    String?   @db.Text
+  usuario_id   Int?
   createdAt    DateTime? @default(now()) @db.DateTime(0)
   updatedAt    DateTime? @db.DateTime(0)
   perfil       perfil?   @relation(fields: [empresaId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK1_empresa_id")
+  usuario      usuario?  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK2_usuario_id")
 
   @@index([empresaId], map: "FK1_empresa_id")
+  @@index([usuario_id], map: "FK2_usuario_id")
 }
 
 model produto {
@@ -2753,28 +2756,29 @@ model upload {
 }
 
 model usuario {
-  id               Int       @id @default(autoincrement())
-  nome             String    @db.Text
-  usuario          String    @db.Text
-  password         String    @db.Text
-  usuariogrupo_id  Int
-  email            String    @db.Text
-  telefone         String    @db.Text
-  status_id        Int
-  cormenu          String?   @default("bg-gradient-dark") @db.Text
-  corhead          String?   @db.Text
-  corbody          String?   @db.Text
-  corfooter        String?   @db.Text
-  linhastabela     Int?      @default(10)
-  tamanhofonte     Int?      @default(100)
-  limitsql         Int?      @default(100)
-  sessao           String?   @db.Text
-  permissao        String?   @db.Text
-  imagem           String?   @default("sem_imagem.jpg") @db.Text
-  tempoinatividade Int?      @default(15)
-  iplocal          String?   @db.Text
-  cookieaceitoem   DateTime? @db.DateTime(0)
-  usuariofuncao_id String?   @db.Text
+  id                     Int                      @id @default(autoincrement())
+  nome                   String                   @db.Text
+  usuario                String                   @db.Text
+  password               String                   @db.Text
+  usuariogrupo_id        Int
+  email                  String                   @db.Text
+  telefone               String                   @db.Text
+  status_id              Int
+  cormenu                String?                  @default("bg-gradient-dark") @db.Text
+  corhead                String?                  @db.Text
+  corbody                String?                  @db.Text
+  corfooter              String?                  @db.Text
+  linhastabela           Int?                     @default(10)
+  tamanhofonte           Int?                     @default(100)
+  limitsql               Int?                     @default(100)
+  sessao                 String?                  @db.Text
+  permissao              String?                  @db.Text
+  imagem                 String?                  @default("sem_imagem.jpg") @db.Text
+  tempoinatividade       Int?                     @default(15)
+  iplocal                String?                  @db.Text
+  cookieaceitoem         DateTime?                @db.DateTime(0)
+  usuariofuncao_id       String?                  @db.Text
+  plugmarket_loja_config plugmarket_loja_config[]
 }
 
 model usuarioagendalogin {
@@ -2830,6 +2834,27 @@ model vendedor {
   gestor     Int      @default(0)
 }
 
+model ImportError {
+  id            String        @id @db.Char(36)
+  row_number    Int
+  sku           String?       @db.VarChar(100)
+  error_message String        @db.Text
+  session_id    String        @db.Char(36)
+  created_at    DateTime      @default(now()) @db.Timestamp(0)
+  ImportSession ImportSession @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_session")
+
+  @@index([session_id], map: "fk_session")
+}
+
+model ImportSession {
+  id          String                @id @db.Char(36)
+  status      ImportSession_status? @default(processing)
+  file_name   String?               @db.VarChar(255)
+  created_at  DateTime              @default(now()) @db.Timestamp(0)
+  updated_at  DateTime              @default(now()) @db.Timestamp(0)
+  ImportError ImportError[]
+}
+
 enum fiscalcreditopresumido_tipo {
   IBS
   CBS
@@ -2853,4 +2878,11 @@ enum usuariolog_acao {
   INSERT
   UPDATE
   DELETE
+}
+
+enum ImportSession_status {
+  processing
+  completed
+  completed_with_errors
+  failed
 }

@@ -9,6 +9,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { AuthModule } from '../auth/auth.module';
 import { MasterUserModule } from '../master-user/master-user.module';
+import { ImportModule } from '../import/import.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { MasterUserModule } from '../master-user/master-user.module';
         port: 6379,
       },
     }),
-    MasterUserModule
+    MasterUserModule,
+    //ImportModule
   ],
   controllers: [AppController],
   providers: [AppService],

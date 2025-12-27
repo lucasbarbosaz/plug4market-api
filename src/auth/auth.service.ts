@@ -102,9 +102,9 @@ export class AuthService {
   private async getAuthToken(): Promise<string> {
     const now = Date.now();
 
-    if (this.token && this.tokenExpiration && now < this.tokenExpiration) {
-      return this.token;
-    }
+    // if (this.token && this.tokenExpiration && now < this.tokenExpiration) {
+    //   return this.token;
+    // }
 
 
     const payload = {
@@ -158,13 +158,27 @@ export class AuthService {
         );
       }
 
+      const user = (await this.tenantService.getTenantClient(tenantName)).usuario.findUnique({
+        where: {
+          id: createStoreDto.usuarioId,
+        },
+      });
+
+
+
+      if (!user) {
+        throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      // esse token é gerado pelo plug4market, apenas fazemos requsição para obter
       const tokenStore = await this.createTokenStore(createStoreDto.cnpj, createStoreDto.cnpjSH);
 
       const prisma = await this.tenantService.getTenantClient(tenantName);
 
 
+      // esse token é para ter acesso a nossa api
       const tokenApi = await this.generateToken({
-        id: data.storeIdMarketPlace,
+        id: createStoreDto.usuarioId,
         role: Role.USER,
       });
 
